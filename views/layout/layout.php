@@ -220,47 +220,79 @@
 
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm py-3">
-  <div class="container-fluid">
-    <a class="navbar-brand d-flex align-items-center gap-2" href="/empresa_celulares">
-      <img src="<?= asset('images/logo.png') ?>" alt="Logo" width="36" height="36" class="rounded-circle border border-light">
-      <span class="fw-bold fs-5 text-uppercase">MovilCare</span>
-    </a>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        
+        <div class="container-fluid">
 
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggler" aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <a class="navbar-brand" href="/empresa_celulares/">
+                <img src="<?= asset('./images/logo.png') ?>" width="35px" alt="movilcare">
+                MovilCare
+            </a>
+            <div class="collapse navbar-collapse" id="navbarToggler">
+                
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0" style="margin: 0;">
+                    <li class="nav-item">
+                        <a class="nav-link" aria-current="page" href="/empresa_celulares/"><i class="bi bi-house-fill me-2"></i>Dashboard</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/empresa_celulares/venta"><i class="bi bi-cash-coin me-2"></i>Ventas</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/empresa_celulares/recepcion"><i class="bi bi-inbox me-2"></i>Recepción</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/empresa_celulares/ordentrabajo"><i class="bi bi-clipboard-check me-2"></i>Orden Trabajo</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/empresa_celulares/tiposervicio"><i class="bi bi-gear-wide-connected me-2"></i>Tipo Servicio</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/empresa_celulares/inventario"><i class="bi bi-box-seam me-2"></i>Inventario</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/empresa_celulares/marca"><i class="bi bi-award me-2"></i>Marca</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/empresa_celulares/modelo"><i class="bi bi-phone me-2"></i>Modelo</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/empresa_celulares/cliente"><i class="bi bi-person-heart me-2"></i>Cliente</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/empresa_celulares/empleado"><i class="bi bi-person-badge me-2"></i>Empleado</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/empresa_celulares/usuario"><i class="bi bi-person-gear me-2"></i>Usuario</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/empresa_celulares/rol"><i class="bi bi-shield-check me-2"></i>Rol</a>
+                    </li>
 
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav me-auto ms-3 gap-2">
-        <li class="nav-item">
-          <a class="nav-link active" href="/empresa_celulares">
-            <i class="bi bi-house-door-fill me-2"></i>Inicio
-          </a>
-        </li>
+                </ul> 
+                <div class="col-lg-1 d-grid mb-lg-0 mb-2">
+                    <!-- Ruta relativa desde el archivo donde se incluye menu.php -->
+                    <a href="/menu/" class="btn btn-danger"><i class="bi bi-arrow-bar-left"></i>MENÚ</a>
+                </div>
 
-        <li class="nav-item">
-          <a class="nav-link" href="/empresa_celulares/usuario">
-            <i class="bi bi-person-gear me-2"></i>Administrador
-          </a>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link" href="/empresa_celulares/cliente">
-            <i class="bi bi-people-fill me-2"></i>Clientes
-          </a>
-        </li>
-      </ul>
-
-      <div class="d-flex align-items-center gap-2">
-        <a href="/menu/" class="btn btn-outline-danger">
-          <i class="bi bi-arrow-bar-left"></i> Menú
-        </a>
-      </div>
-    </div>
-  </div>
-</nav>
-
+            
+            </div>
+        </div>
+        
+    </nav>
     <div class="progress fixed-bottom" style="height: 6px;">
         <div class="progress-bar progress-bar-animated bg-danger" id="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"></div>
     </div>

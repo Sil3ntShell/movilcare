@@ -2,9 +2,8 @@
 
 namespace Model;
 
-// Modelo Tabla Recepcion
-class Recepcion extends ActiveRecord {
-    
+class Recepcion extends ActiveRecord 
+{
     public static $tabla = 'recepcion';
     public static $columnasDB = [
         'cliente_id',
@@ -23,9 +22,10 @@ class Recepcion extends ActiveRecord {
         'recepcion_estado',
         'recepcion_situacion'
     ];
-    
+
     public static $idTabla = 'recepcion_id';
     
+    // Propiedades del modelo
     public $recepcion_id;
     public $cliente_id;
     public $empleado_id;
@@ -44,10 +44,11 @@ class Recepcion extends ActiveRecord {
     public $recepcion_estado;
     public $recepcion_situacion;
 
-    public function __construct($args = []){
+    public function __construct($args = [])
+    {
         $this->recepcion_id = $args['recepcion_id'] ?? null;
-        $this->cliente_id = $args['cliente_id'] ?? '';
-        $this->empleado_id = $args['empleado_id'] ?? '';
+        $this->cliente_id = $args['cliente_id'] ?? null;
+        $this->empleado_id = $args['empleado_id'] ?? null;
         $this->recepcion_fecha = $args['recepcion_fecha'] ?? null;
         $this->recepcion_tipo_celular = $args['recepcion_tipo_celular'] ?? '';
         $this->recepcion_marca = $args['recepcion_marca'] ?? '';
@@ -58,9 +59,72 @@ class Recepcion extends ActiveRecord {
         $this->recepcion_estado_dispositivo = $args['recepcion_estado_dispositivo'] ?? '';
         $this->recepcion_accesorios = $args['recepcion_accesorios'] ?? '';
         $this->recepcion_observaciones_cliente = $args['recepcion_observaciones_cliente'] ?? '';
-        $this->recepcion_costo_estimado = $args['recepcion_costo_estimado'] ?? 0.00;
-        $this->recepcion_tiempo_estimado = $args['recepcion_tiempo_estimado'] ?? 0; //El tiempo es en dias
-        $this->recepcion_estado = $args['recepcion_estado'] ?? '';
+        $this->recepcion_costo_estimado = $args['recepcion_costo_estimado'] ?? 0;
+        $this->recepcion_tiempo_estimado = $args['recepcion_tiempo_estimado'] ?? 1;
+        $this->recepcion_estado = $args['recepcion_estado'] ?? 'RECIBIDO';
         $this->recepcion_situacion = $args['recepcion_situacion'] ?? 1;
+    }
+
+    // Eliminar recepción (lógico)
+    public static function EliminarRecepcion($id)
+    {
+        $sql = "UPDATE " . self::$tabla . " SET recepcion_situacion = 0 WHERE " . self::$idTabla . " = " . intval($id);
+        return self::$db->exec($sql);
+    }
+
+    // Obtener estados disponibles
+    public static function getEstadosDisponibles()
+    {
+        return [
+            'RECIBIDO' => 'Recibido',
+            'EN_DIAGNOSTICO' => 'En Diagnóstico',
+            'ESPERANDO_REPUESTOS' => 'Esperando Repuestos',
+            'EN_REPARACION' => 'En Reparación',
+            'REPARADO' => 'Reparado',
+            'ENTREGADO' => 'Entregado',
+            'CANCELADO' => 'Cancelado'
+        ];
+    }
+
+    // Obtener marcas comunes de celulares
+    public static function getMarcasComunes()
+    {
+        return [
+            'Samsung',
+            'Apple',
+            'Huawei',
+            'Xiaomi',
+            'LG',
+            'Motorola',
+            'Nokia',
+            'Sony',
+            'OnePlus',
+            'Oppo',
+            'Vivo',
+            'Realme',
+            'Honor',
+            'Google',
+            'Otros'
+        ];
+    }
+
+    // Obtener tipos de celular
+    public static function getTiposCelular()
+    {
+        return [
+            'Smartphone',
+            'Teléfono Básico',
+            'iPhone',
+            'Tablet Android',
+            'iPad',
+            'Smartwatch',
+            'Otros'
+        ];
+    }
+
+    // Sanear cadena de entrada
+    private static function sanitizarCadena($valor)
+    {
+        return htmlspecialchars(trim($valor), ENT_QUOTES, 'UTF-8');
     }
 }

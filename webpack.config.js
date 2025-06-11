@@ -7,6 +7,16 @@ module.exports = {
     'js/inicio' : './src/js/inicio.js',
     'js/usuario/index' : './src/js/usuario/index.js',
     'js/cliente/index' : './src/js/cliente/index.js',
+    'js/marca/index' : './src/js/marca/index.js',
+    'js/modelo/index' : './src/js/modelo/index.js',
+    'js/inventario/index' : './src/js/inventario/index.js',
+    'js/rol/index' : './src/js/rol/index.js',
+    'js/empleado/index' : './src/js/empleado/index.js',
+    'js/tiposervicio/index' : './src/js/tiposervicio/index.js',
+    'js/recepcion/index' : './src/js/recepcion/index.js',
+    'js/ordentrabajo/index' : './src/js/ordentrabajo/index.js',
+    'js/venta/index' : './src/js/venta/index.js',
+    
   },
   output: {
     filename: '[name].js',
