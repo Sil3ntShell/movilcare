@@ -17,30 +17,24 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: black;
-            color: white;
+            color: black;
             background-image: url('<?= asset('images/logo.png') ?>');
         }
 
-        /* Navbar */
-        .navbar-custom {
-            background: rgba(0, 0, 0, 0.9) !important;
-            backdrop-filter: blur(10px);
+       .navbar-nav .nav-link {
+        font-weight: 500;
+        transition: color 0.3s ease;
         }
 
-        .navbar-brand {
-            color: var(--primary-color) !important;
-            font-weight: bold;
-            font-size: 1.8rem;
+        .navbar-nav .nav-link:hover,
+        .navbar-nav .nav-link.active {
+        color: #ffc107 !important;
         }
 
-        .navbar-nav .nav-link {
-            color: white !important;
-            font-weight: 500;
+        .navbar-brand span {
+        letter-spacing: 0.5px;
         }
 
-        .navbar-nav .nav-link:hover {
-            color: var(--primary-color) !important;
-        }
 
         .btn-login {
             background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
@@ -149,74 +143,137 @@
                 font-size: 1.2rem;
             }
         }
+
+
+        /* ====== ESTILOS PERSONALIZADOS PARA REGISTRO DE USUARIOS ====== */
+
+        /* Formulario: Tarjeta con sombras más suaves y bordes redondeados */
+        .card {
+            border-radius: 1rem;
+            box-shadow: 0 0.5rem 1.2rem rgba(0, 0, 0, 0.1);
+        }
+
+        /* Header del formulario */
+        .card-header.bg-gradient-primary {
+            background: linear-gradient(90deg, #007bff, #0056b3);
+            border-top-left-radius: 1rem;
+            border-top-right-radius: 1rem;
+        }
+
+        /* Header de la tabla */
+        .card-header.bg-gradient-info {
+            background: linear-gradient(90deg, #17a2b8, #0d6efd);
+            border-top-left-radius: 1rem;
+            border-top-right-radius: 1rem;
+        }
+
+        /* Inputs */
+        input.form-control,
+        select.form-control,
+        textarea.form-control {
+            border-radius: 0.5rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input.form-control:focus,
+        textarea.form-control:focus,
+        select.form-control:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.2);
+        }
+
+        /* Botones */
+        button.btn {
+            border-radius: 0.5rem;
+        }
+
+        /* Iconos dentro de input-group */
+        .input-group-text {
+            border-radius: 0.5rem 0 0 0.5rem;
+            background-color: #f1f1f1;
+        }
+
+        /* Previsualización de imagen */
+        #previewImg {
+            object-fit: cover;
+            border-radius: 0.5rem;
+            border: 1px solid #dee2e6;
+        }
+
+        /* Spinner */
+        #loadingSpinner {
+            vertical-align: middle;
+        }
+
+        /* Sección vacía de la tabla */
+        #tablaContainer i {
+            color: #adb5bd;
+        }
+
+        #tablaContainer p {
+            font-size: 1rem;
+            color: #6c757d;
+        }
+
     </style>
 
 
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark  bg-dark">
-        
-        <div class="container-fluid">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm py-3">
+  <div class="container-fluid">
+    <a class="navbar-brand d-flex align-items-center gap-2" href="/empresa_celulares">
+      <img src="<?= asset('images/logo.png') ?>" alt="Logo" width="36" height="36" class="rounded-circle border border-light">
+      <span class="fw-bold fs-5 text-uppercase">MovilCare</span>
+    </a>
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggler" aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <a class="navbar-brand" href="/ejemplo/">
-                <img src="<?= asset('./images/cit.png') ?>" width="35px'" alt="cit" >
-                Aplicaciones
-            </a>
-            <div class="collapse navbar-collapse" id="navbarToggler">
-                
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0" style="margin: 0;">
-                    <li class="nav-item">
-                        <a class="nav-link" aria-current="page" href="/ejemplo/"><i class="bi bi-house-fill me-2"></i>Inicio</a>
-                    </li>
-  
-                    <div class="nav-item dropdown " >
-                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                            <i class="bi bi-gear me-2"></i>Dropdown
-                        </a>
-                        <ul class="dropdown-menu  dropdown-menu-dark "id="dropwdownRevision" style="margin: 0;">
-                            <!-- <h6 class="dropdown-header">Información</h6> -->
-                            <li>
-                                <a class="dropdown-item nav-link text-white " href="/aplicaciones/nueva"><i class="ms-lg-0 ms-2 bi bi-plus-circle me-2"></i>Subitem</a>
-                            </li>
-                        
-                    
-                        
-                        </ul>
-                    </div> 
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
-                </ul> 
-                <div class="col-lg-1 d-grid mb-lg-0 mb-2">
-                    <!-- Ruta relativa desde el archivo donde se incluye menu.php -->
-                    <a href="/menu/" class="btn btn-danger"><i class="bi bi-arrow-bar-left"></i>MENÚ</a>
-                </div>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav me-auto ms-3 gap-2">
+        <li class="nav-item">
+          <a class="nav-link active" href="/empresa_celulares">
+            <i class="bi bi-house-door-fill me-2"></i>Inicio
+          </a>
+        </li>
 
-            
-            </div>
-        </div>
-        
-    </nav>
+        <li class="nav-item">
+          <a class="nav-link" href="/empresa_celulares/usuario">
+            <i class="bi bi-person-gear me-2"></i>Administrador
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="/empresa_celulares/cliente">
+            <i class="bi bi-people-fill me-2"></i>Clientes
+          </a>
+        </li>
+      </ul>
+
+      <div class="d-flex align-items-center gap-2">
+        <a href="/menu/" class="btn btn-outline-danger">
+          <i class="bi bi-arrow-bar-left"></i> Menú
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>
+
     <div class="progress fixed-bottom" style="height: 6px;">
         <div class="progress-bar progress-bar-animated bg-danger" id="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"></div>
     </div>
     <div class="container-fluid pt-5 mb-4" style="min-height: 85vh">
-        
+        <!-- Contenido de la pagina -->
         <?php echo $contenido; ?>
+
     </div>
      <!-- Footer -->
     <footer class="py-4 footer-section">
         <div class="container">
             <div class="row">
                 <div class="col-12 text-center">
-                    <div class="social-links mb-3">
-                        <a href="#"><i class="fab fa-facebook"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                        <a href="#"><i class="fab fa-whatsapp"></i></a>
-                        <a href="#"><i class="fab fa-youtube"></i></a>
-                        <a href="#"><i class="fab fa-tiktok"></i></a>
-                    </div>
                     <p class="mb-1">&copy; 2024 TechCell Guatemala. Todos los derechos reservados.</p>
                     <p class="text-muted">Expertos en reparación y venta de celulares en Guatemala</p>
                 </div>

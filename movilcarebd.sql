@@ -80,7 +80,6 @@ CREATE TABLE cliente(
     cliente_nit VARCHAR(20),
     cliente_correo VARCHAR(100),
     cliente_tel INT NOT NULL,
-    cliente_cel INT,
     cliente_direc VARCHAR(150) NOT NULL,
     cliente_fecha_nacimiento DATE,
     cliente_fecha_registro DATE DEFAULT TODAY,
