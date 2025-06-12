@@ -1,4 +1,5 @@
 import '../scss/app.scss';
+import { Dropdown } from "bootstrap";
 
 document.addEventListener('DOMContentLoaded', (e)=> {
     const dropdown = document.querySelector('.dropdown-menu');

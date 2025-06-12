@@ -7,11 +7,14 @@
     <link rel="shortcut icon" href="<?= asset('images/logo.png') ?>" type="image/x-icon">
     <link rel="stylesheet" href="<?= asset('build/styles.css') ?>">
     <title>MOVILCARE</title>
-
-        <style>
+<style>
         :root {
             --primary-color: #00d4ff;
             --primary-dark: #0099cc;
+            --navbar-bg: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+            --dropdown-bg: rgba(26, 26, 46, 0.98);
+            --hover-color: #ffc107;
+            --text-color: #ffffff;
         }
 
         body {
@@ -21,21 +24,8 @@
             background-image: url('<?= asset('images/logo.png') ?>');
         }
 
-       .navbar-nav .nav-link {
-        font-weight: 500;
-        transition: color 0.3s ease;
-        }
-
-        .navbar-nav .nav-link:hover,
-        .navbar-nav .nav-link.active {
-        color: #ffc107 !important;
-        }
-
-        .navbar-brand span {
-        letter-spacing: 0.5px;
-        }
-
-
+        /* ========== ESTILOS ORIGINALES DEL HERO Y CONTENIDO ========== */
+        
         .btn-login {
             background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
             border: none;
@@ -144,7 +134,6 @@
             }
         }
 
-
         /* ====== ESTILOS PERSONALIZADOS PARA REGISTRO DE USUARIOS ====== */
 
         /* Formulario: Tarjeta con sombras más suaves y bordes redondeados */
@@ -215,83 +204,338 @@
             color: #6c757d;
         }
 
-    </style>
+        /* ========== NUEVOS ESTILOS DEL NAVBAR MEJORADO ========== */
 
+        /* Navbar principal mejorado */
+        .navbar-custom {
+            background: var(--navbar-bg);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 1050;
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.4rem;
+            color: var(--text-color) !important;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-brand:hover {
+            color: var(--primary-color) !important;
+            transform: scale(1.05);
+        }
+
+        .navbar-brand img {
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+
+        .navbar-brand:hover img {
+            transform: rotate(360deg);
+        }
+
+        /* Links del navbar */
+        .navbar-nav .nav-link {
+            color: var(--text-color) !important;
+            font-weight: 500;
+            padding: 0.8rem 1rem !important;
+            border-radius: 8px;
+            margin: 0 0.2rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: var(--hover-color) !important;
+            background: rgba(255, 193, 7, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .navbar-nav .nav-link.active {
+            color: var(--primary-color) !important;
+            background: rgba(0, 212, 255, 0.15);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+        }
+
+        /* Dropdown mejorado */
+        .dropdown-menu {
+            background: var(--dropdown-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            min-width: 250px;
+        }
+
+        .dropdown-item {
+            color: var(--text-color);
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin: 0.2rem 0;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(255, 193, 7, 0.15);
+            color: var(--hover-color);
+            transform: translateX(5px);
+        }
+
+        .dropdown-item:focus {
+            background: rgba(0, 212, 255, 0.15);
+            color: var(--primary-color);
+        }
+
+        /* Iconos en dropdown */
+        .dropdown-item i {
+            width: 20px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        /* Separadores en dropdown */
+        .dropdown-divider {
+            border-color: rgba(255, 255, 255, 0.2);
+            margin: 0.5rem 0;
+        }
+
+        /* Botón de menú mejorado */
+        .btn-menu {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            padding: 0.6rem 1.2rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+        }
+
+        .btn-menu:hover {
+            background: linear-gradient(135deg, #c82333, #a71e2a);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
+            color: white;
+        }
+
+        /* Toggler personalizado */
+        .navbar-toggler {
+            border: none;
+            padding: 0.25rem 0.5rem;
+        }
+
+        .navbar-toggler:focus {
+            box-shadow: 0 0 0 0.25rem rgba(0, 212, 255, 0.25);
+        }
+
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.8%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+
+        /* Efectos hover para grupos - DESHABILITADO para usar solo click */
+        /* .dropdown:hover .dropdown-menu {
+            display: block;
+            animation: fadeInDown 0.3s ease;
+        } */
+
+        /* Animación para dropdowns al hacer click */
+        .dropdown-menu.show {
+            animation: fadeInDown 0.3s ease;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 991.98px) {
+            .dropdown-menu {
+                position: static !important;
+                transform: none !important;
+                background: rgba(26, 26, 46, 0.95);
+                margin-top: 0.5rem;
+                border: none;
+                box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            }
+            
+            .navbar-nav .nav-link {
+                margin: 0.2rem 0;
+            }
+        }
+
+        /* Badges para notificaciones */
+        .notification-badge {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #dc3545;
+            color: white;
+            border-radius: 50%;
+            font-size: 0.7rem;
+            padding: 0.2rem 0.4rem;
+            min-width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
 
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        
+ <nav class="navbar navbar-expand-lg navbar-custom">
         <div class="container-fluid">
-
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggler" aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+            <!-- Brand -->
             <a class="navbar-brand" href="/empresa_celulares/">
                 <img src="<?= asset('./images/logo.png') ?>" width="35px" alt="movilcare">
-                MovilCare
+                <span>MovilCare</span>
             </a>
-            <div class="collapse navbar-collapse" id="navbarToggler">
-                
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0" style="margin: 0;">
+
+            <!-- Toggler -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Navbar content -->
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <!-- Dashboard -->
                     <li class="nav-item">
-                        <a class="nav-link" aria-current="page" href="/empresa_celulares/"><i class="bi bi-house-fill me-2"></i>Dashboard</a>
-                    </li>
-                    
-                    <li class="nav-item">
-                        <a class="nav-link" href="/empresa_celulares/venta"><i class="bi bi-cash-coin me-2"></i>Ventas</a>
-                    </li>
-                    
-                    <li class="nav-item">
-                        <a class="nav-link" href="/empresa_celulares/recepcion"><i class="bi bi-inbox me-2"></i>Recepción</a>
-                    </li>
-                    
-                    <li class="nav-item">
-                        <a class="nav-link" href="/empresa_celulares/ordentrabajo"><i class="bi bi-clipboard-check me-2"></i>Orden Trabajo</a>
-                    </li>
-                    
-                    <li class="nav-item">
-                        <a class="nav-link" href="/empresa_celulares/tiposervicio"><i class="bi bi-gear-wide-connected me-2"></i>Tipo Servicio</a>
-                    </li>
-                    
-                    <li class="nav-item">
-                        <a class="nav-link" href="/empresa_celulares/inventario"><i class="bi bi-box-seam me-2"></i>Inventario</a>
-                    </li>
-                    
-                    <li class="nav-item">
-                        <a class="nav-link" href="/empresa_celulares/marca"><i class="bi bi-award me-2"></i>Marca</a>
-                    </li>
-                    
-                    <li class="nav-item">
-                        <a class="nav-link" href="/empresa_celulares/modelo"><i class="bi bi-phone me-2"></i>Modelo</a>
-                    </li>
-                    
-                    <li class="nav-item">
-                        <a class="nav-link" href="/empresa_celulares/cliente"><i class="bi bi-person-heart me-2"></i>Cliente</a>
-                    </li>
-                    
-                    <li class="nav-item">
-                        <a class="nav-link" href="/empresa_celulares/empleado"><i class="bi bi-person-badge me-2"></i>Empleado</a>
-                    </li>
-                    
-                    <li class="nav-item">
-                        <a class="nav-link" href="/empresa_celulares/usuario"><i class="bi bi-person-gear me-2"></i>Usuario</a>
-                    </li>
-                    
-                    <li class="nav-item">
-                        <a class="nav-link" href="/empresa_celulares/rol"><i class="bi bi-shield-check me-2"></i>Rol</a>
+                        <a class="nav-link active" href="/empresa_celulares/">
+                            <i class="bi bi-house-fill"></i>
+                            Dashboard
+                        </a>
                     </li>
 
-                </ul> 
-                <div class="col-lg-1 d-grid mb-lg-0 mb-2">
-                    <!-- Ruta relativa desde el archivo donde se incluye menu.php -->
-                    <a href="/menu/" class="btn btn-danger"><i class="bi bi-arrow-bar-left"></i>MENÚ</a>
+                    <!-- Ventas y Operaciones -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-cash-stack"></i>
+                            Ventas & Operaciones
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a class="dropdown-item" href="/empresa_celulares/venta">
+                                    <i class="bi bi-cash-coin"></i>
+                                    Ventas
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="/empresa_celulares/recepcion">
+                                    <i class="bi bi-inbox"></i>
+                                    Recepción
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="/empresa_celulares/ordentrabajo">
+                                    <i class="bi bi-clipboard-check"></i>
+                                    Orden de Trabajo
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- Servicios y Productos -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-gear-wide-connected"></i>
+                            Servicios & Productos
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a class="dropdown-item" href="/empresa_celulares/tiposervicio">
+                                    <i class="bi bi-gear-wide-connected"></i>
+                                    Tipos de Servicio
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="/empresa_celulares/inventario">
+                                    <i class="bi bi-box-seam"></i>
+                                    Inventario
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="/empresa_celulares/marca">
+                                    <i class="bi bi-award"></i>
+                                    Marcas
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="/empresa_celulares/modelo">
+                                    <i class="bi bi-phone"></i>
+                                    Modelos
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- Gestión de Personas -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-people"></i>
+                            Gestión de Personas
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a class="dropdown-item" href="/empresa_celulares/cliente">
+                                    <i class="bi bi-person-heart"></i>
+                                    Clientes
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="/empresa_celulares/empleado">
+                                    <i class="bi bi-person-badge"></i>
+                                    Empleados
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="/empresa_celulares/usuario">
+                                    <i class="bi bi-person-gear"></i>
+                                    Usuarios
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="/empresa_celulares/rol">
+                                    <i class="bi bi-shield-check"></i>
+                                    Roles
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <!-- Botón de menú -->
+                <div class="d-grid d-lg-block">
+                    <a href="/menu/" class="btn btn-menu">
+                        <i class="bi bi-arrow-bar-left me-2"></i>
+                        MENÚ PRINCIPAL
+                    </a>
                 </div>
-
-            
             </div>
         </div>
-        
     </nav>
     <div class="progress fixed-bottom" style="height: 6px;">
         <div class="progress-bar progress-bar-animated bg-danger" id="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"></div>

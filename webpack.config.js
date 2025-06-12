@@ -16,6 +16,7 @@ module.exports = {
     'js/recepcion/index' : './src/js/recepcion/index.js',
     'js/ordentrabajo/index' : './src/js/ordentrabajo/index.js',
     'js/venta/index' : './src/js/venta/index.js',
+    'js/login/index' : './src/js/login/index.js',
     
   },
   output: {

@@ -1,15 +1,145 @@
-import DataTable from "datatables.net-bs5";
-import { validarFormulario } from '../funciones';
+// usuario/index.js
 import Swal from "sweetalert2";
+import DataTable from "datatables.net-bs5";
+import { validarFormulario } from "../funciones";
 import { lenguaje } from "../lenguaje";
 
-// Elementos del DOM
-const formUsuario = document.getElementById('userForm');
-const btnRegistrar = document.getElementById('btnRegistrar');
-const btnLimpiar = document.getElementById('btnLimpiar');
+// Elementos del DOM - CORREGIDOS para coincidir con el HTML
+const FormularioUsuarios = document.getElementById('userForm'); // Cambiado de FormularioUsuarios
+const BtnGuardar = document.getElementById('btnRegistrar'); // Cambiado de BtnGuardar
+const BtnModificar = document.getElementById('btnModificar'); // Cambiado de BtnModificar
+const BtnLimpiar = document.getElementById('btnLimpiar'); // Cambiado de BtnLimpiar
+const usuario_tel = document.getElementById('usuario_tel');
+const usuario_dpi = document.getElementById('usuario_dpi');
+const usuario_contra = document.getElementById('usuario_contra');
+const confirmar_contra = document.getElementById('confirmar_contra');
 
-let usuarioEditando = null;
-let datatable = null;
+// Validar Teléfono
+const ValidarTelefono = () => {
+    const numero = usuario_tel.value.trim();
+    
+    if (numero.length < 1) {
+        usuario_tel.classList.remove('is-valid', 'is-invalid');
+        return true;
+    } else {
+        if (numero.length !== 8) {
+            usuario_tel.classList.add('is-invalid');
+            usuario_tel.classList.remove('is-valid');
+            Swal.fire({
+                position: "center",
+                icon: "warning",
+                title: "Teléfono incorrecto",
+                text: "Debe tener exactamente 8 dígitos",
+                showConfirmButton: true,
+            });
+            return false;
+        } else {
+            usuario_tel.classList.remove('is-invalid');
+            usuario_tel.classList.add('is-valid');
+            return true;
+        }
+    }
+};
+
+// Validar DPI
+const ValidarDPI = () => {
+    const numeroDPI = usuario_dpi.value.trim();
+    
+    if (numeroDPI.length < 1) {
+        usuario_dpi.classList.remove('is-valid', 'is-invalid');
+        return true;
+    } else {
+        if (!/^\d+$/.test(numeroDPI)) {
+            usuario_dpi.classList.add('is-invalid');
+            usuario_dpi.classList.remove('is-valid');
+            Swal.fire({ 
+                icon: "error", 
+                title: "DPI inválido", 
+                text: "El DPI debe contener solo números" 
+            });
+            return false;
+        }
+        
+        if (numeroDPI.length !== 13) {
+            usuario_dpi.classList.add('is-invalid');
+            usuario_dpi.classList.remove('is-valid');
+            
+            if (numeroDPI.length < 13) {
+                Swal.fire({ 
+                    icon: "error", 
+                    title: "DPI inválido", 
+                    text: `Debe contener exactamente 13 dígitos. Faltan ${13 - numeroDPI.length} dígitos.` 
+                });
+            } else {
+                Swal.fire({ 
+                    icon: "error", 
+                    title: "DPI inválido", 
+                    text: `Debe contener exactamente 13 dígitos. Sobran ${numeroDPI.length - 13} dígitos.` 
+                });
+            }
+            return false;
+        } else {
+            usuario_dpi.classList.remove('is-invalid');
+            usuario_dpi.classList.add('is-valid');
+            return true;
+        }
+    }
+};
+
+// Validar Contraseña Segura
+const validarContrasenaSegura = () => {
+    const password = usuario_contra.value;
+    let errores = [];
+    
+    if (password.length < 1) {
+        usuario_contra.classList.remove('is-valid', 'is-invalid');
+        usuario_contra.title = '';
+        return true;
+    }
+    
+    if (password.length < 10) errores.push("Mínimo 10 caracteres");
+    if (!/[A-Z]/.test(password)) errores.push("Al menos una mayúscula");
+    if (!/[a-z]/.test(password)) errores.push("Al menos una minúscula");
+    if (!/[0-9]/.test(password)) errores.push("Al menos un número");
+    if (!/[!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>\/?]/.test(password)) errores.push("Al menos un carácter especial");
+    
+    if (errores.length > 0) {
+        usuario_contra.classList.add('is-invalid');
+        usuario_contra.classList.remove('is-valid');
+        usuario_contra.title = "Falta: " + errores.join(", ");
+        return false;
+    } else {
+        usuario_contra.classList.remove('is-invalid');
+        usuario_contra.classList.add('is-valid');
+        usuario_contra.title = "Contraseña segura ✓";
+        return true;
+    }
+};
+
+// Validar Confirmación de Contraseña
+const validarConfirmarContrasena = () => {
+    if (confirmar_contra.value.length < 1) {
+        confirmar_contra.classList.remove('is-valid', 'is-invalid');
+        return true;
+    }
+
+    if (usuario_contra.value !== confirmar_contra.value) {
+        confirmar_contra.classList.add('is-invalid');
+        confirmar_contra.classList.remove('is-valid');
+        Swal.fire({
+            position: "center",
+            icon: "error",
+            title: "Error",
+            text: "Las contraseñas no coinciden",
+            showConfirmButton: true,
+        });
+        return false;
+    } else {
+        confirmar_contra.classList.remove('is-invalid');
+        confirmar_contra.classList.add('is-valid');
+        return true;
+    }
+};
 
 // CARGAR ROLES PARA EL SELECT
 const cargarRoles = async () => {
@@ -18,10 +148,7 @@ const cargarRoles = async () => {
         const data = await respuesta.json();
         
         const selectRol = document.getElementById('rol_id');
-        if (!selectRol) {
-            console.error('No se encontró el elemento rol_id');
-            return;
-        }
+        if (!selectRol) return;
         
         selectRol.innerHTML = '<option value="">Seleccione un rol</option>';
         
@@ -32,68 +159,9 @@ const cargarRoles = async () => {
                 option.textContent = rol.rol_nombre;
                 selectRol.appendChild(option);
             });
-            console.log('Roles cargados exitosamente:', data.data);
-        } else {
-            console.error('Error cargando roles:', data.mensaje);
-            Swal.fire('Error', 'No se pudieron cargar los roles: ' + data.mensaje, 'error');
         }
     } catch (error) {
-        console.error('Error en cargarRoles:', error);
-        Swal.fire('Error', 'Error de conexión al cargar roles', 'error');
-    }
-};
-
-// VALIDACIONES EN TIEMPO REAL
-const validarContraseña = () => {
-    const contra = document.getElementById('usuario_contra');
-    const confirmar = document.getElementById('confirmar_contra');
-    
-    if (!contra || !confirmar) return;
-    
-    const contraValue = contra.value;
-    const confirmarValue = confirmar.value;
-    
-    // Validar fortaleza de contraseña
-    const tieneMayus = /[A-Z]/.test(contraValue);
-    const tieneMinus = /[a-z]/.test(contraValue);
-    const tieneNum = /[0-9]/.test(contraValue);
-    const tieneEspecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(contraValue);
-    
-    if (contraValue.length >= 10 && tieneMayus && tieneMinus && tieneNum && tieneEspecial) {
-        contra.classList.add('is-valid');
-        contra.classList.remove('is-invalid');
-    } else if (contraValue.length > 0) {
-        contra.classList.add('is-invalid');
-        contra.classList.remove('is-valid');
-    } else {
-        contra.classList.remove('is-valid', 'is-invalid');
-    }
-    
-    // Validar confirmación
-    if (confirmarValue && contraValue === confirmarValue && contraValue.length >= 10) {
-        confirmar.classList.add('is-valid');
-        confirmar.classList.remove('is-invalid');
-    } else if (confirmarValue.length > 0) {
-        confirmar.classList.add('is-invalid');
-        confirmar.classList.remove('is-valid');
-    } else {
-        confirmar.classList.remove('is-valid', 'is-invalid');
-    }
-};
-
-// MOSTRAR/OCULTAR CONTRASEÑA
-const togglePassword = () => {
-    const passwordInput = document.getElementById('usuario_contra');
-    const toggleIcon = document.getElementById('toggleIcon');
-    
-    if (!passwordInput || !toggleIcon) return;
-    
-    if (passwordInput.type === 'password') {
-        passwordInput.type = 'text';
-        toggleIcon.className = 'bi bi-eye-slash';
-    } else {
-        passwordInput.type = 'password';
-        toggleIcon.className = 'bi bi-eye';
+        console.error('Error cargando roles:', error);
     }
 };
 
@@ -124,321 +192,434 @@ const previsualizarImagen = (event) => {
     }
 };
 
-// GUARDAR USUARIO
-const guardarUsuario = async (event) => {
-    event.preventDefault();
-    
-    if (!btnRegistrar) return;
-    btnRegistrar.disabled = true;
-
-    console.log('Guardando usuario. Modo edición:', !!usuarioEditando);
-
-    if (!validarFormulario(formUsuario, ['usuario_id'])) {
-        Swal.fire({ icon: "info", title: "Formulario incompleto", text: "Debe completar todos los campos requeridos" });
-        btnRegistrar.disabled = false;
-        return;
-    }
-
-    // Validar contraseñas solo si no estamos editando O si se proporcionaron nuevas contraseñas
-    const contra = document.getElementById('usuario_contra');
-    const confirmar = document.getElementById('confirmar_contra');
-    
-    if (!usuarioEditando || (contra && contra.value.trim() !== '')) {
-        if (!contra || !confirmar) {
-            btnRegistrar.disabled = false;
-            return;
-        }
-        
-        if (contra.value !== confirmar.value) {
-            Swal.fire({ icon: "error", title: "Error", text: "Las contraseñas no coinciden" });
-            btnRegistrar.disabled = false;
-            return;
-        }
-
-        // Solo validar complejidad si se proporciona contraseña
-        if (contra.value.trim() !== '' && contra.classList.contains('is-invalid')) {
-            Swal.fire({ icon: "error", title: "Contraseña inválida", text: "Debe corregir la contraseña antes de continuar" });
-            btnRegistrar.disabled = false;
-            return;
-        }
-    }
-
-    const body = new FormData(formUsuario);
-    const url = usuarioEditando ? '/empresa_celulares/usuario/actualizarAPI' : '/empresa_celulares/usuario/guardarAPI';
-    
-    if (usuarioEditando) {
-        body.append('usuario_id', usuarioEditando);
-    }
-
-    console.log('Enviando a URL:', url);
-    console.log('Usuario ID:', usuarioEditando);
-
-    try {
-        const respuesta = await fetch(url, { method: 'POST', body });
-        const data = await respuesta.json();
-        
-        console.log('Respuesta del servidor:', data);
-        
-        if (data.codigo == 1) {
-            Swal.fire({ icon: "success", title: usuarioEditando ? "Usuario actualizado" : "Usuario registrado", text: data.mensaje });
-            limpiarTodo();
-            buscarUsuarios();
-        } else {
-            Swal.fire({ icon: "error", title: "Error", text: data.mensaje });
-        }
-    } catch (error) {
-        console.error('Error en guardarUsuario:', error);
-        Swal.fire({ icon: "error", title: "Error", text: "Error de conexión" });
-    }
-    
-    btnRegistrar.disabled = false;
-};
-
-// BUSCAR USUARIOS
-const buscarUsuarios = async () => {
-    try {
-        const res = await fetch('/empresa_celulares/usuario/buscarAPI');
-        const data = await res.json();
-        
-        if (data.codigo == 1) {
-            if (datatable) {
-                datatable.clear().draw();
-                datatable.rows.add(data.data).draw();
-            }
-            console.log('Usuarios cargados:', data.data);
-        } else {
-            console.error('Error buscando usuarios:', data.mensaje);
-            Swal.fire({ icon: "info", title: "Error", text: data.mensaje });
-        }
-    } catch (error) {
-        console.error('Error en buscarUsuarios:', error);
-        Swal.fire({ icon: "error", title: "Error", text: "Error al cargar usuarios" });
-    }
-};
-
-// INICIALIZAR DATATABLE
-const inicializarTabla = () => {
-    const tablaElement = document.getElementById('tablaUsuarios');
-    if (!tablaElement) {
-        console.error('No se encontró el elemento tablaUsuarios');
-        return;
-    }
-
-    try {
-        datatable = new DataTable('#tablaUsuarios', {
-            language: lenguaje,
-            data: [],
-            columns: [
-                { title: "ID", data: "usuario_id", render: (data, type, row, meta) => meta.row + 1 },
-                {
-                    title: "Foto",
-                    data: "usuario_fotografia",
-                    render: (data, type, row) => {
-                        if (data) {
-                            return `<img src="/empresa_celulares/storage/fotos_usuarios/${data}" 
-                                   style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" 
-                                   onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiM2Yzc1N2QiLz4KPGNpcmNsZSBjeD0iMjAiIGN5PSIxNiIgcj0iNCIgZmlsbD0iI2ZmZmZmZiIvPgo8cGF0aCBkPSJNMjggMjhBOCA4IDAgMCAwIDEyIDI4IiBmaWxsPSIjZmZmZmZmIi8+Cjwvc3ZnPg==';"/>`;
-                        } else {
-                            return `<span class="badge bg-secondary rounded-circle" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 8px;">Sin foto</span>`;
-                        }
-                    },
-                    orderable: false,
-                    className: 'text-center'
-                },
-                { 
-                    title: "Nombre Completo", 
-                    data: null, 
-                    render: (data, type, row) => `${row.usuario_nom1} ${row.usuario_nom2 || ''} ${row.usuario_ape1} ${row.usuario_ape2 || ''}`.trim()
-                },
-                { title: "DPI", data: "usuario_dpi" },
-                { title: "Teléfono", data: "usuario_tel" },
-                { title: "Correo", data: "usuario_correo" },
-                { 
-                    title: "Rol", 
-                    data: "rol_nombre",
-                    render: (data) => data || 'Sin rol'
-                },
-                {
-                    title: "Acciones", 
-                    data: "usuario_id",
-                    render: (id, t, row) => `
-                        <div class="d-flex justify-content-center gap-1">
-                            <button class="btn btn-warning btn-sm modificar" data-id="${id}" data-json='${JSON.stringify(row)}'>✏️</button>
-                            <button class="btn btn-danger btn-sm eliminar" data-id="${id}">🗑️</button>
-                        </div>
-                    `,
-                    orderable: false,
-                    className: 'text-center'
-                }
-            ]
-        });
-
-        // Event listeners para los botones de tabla
-        datatable.on('click', '.modificar', llenarFormulario);
-        datatable.on('click', '.eliminar', eliminarUsuario);
-        
-        console.log('DataTable inicializada correctamente');
-    } catch (error) {
-        console.error('Error inicializando DataTable:', error);
-    }
-};
-
-// LLENAR FORMULARIO PARA EDITAR
-const llenarFormulario = (e) => {
-    try {
-        const datos = JSON.parse(e.currentTarget.dataset.json);
-        
-        document.getElementById('usuario_nom1').value = datos.usuario_nom1 || '';
-        document.getElementById('usuario_nom2').value = datos.usuario_nom2 || '';
-        document.getElementById('usuario_ape1').value = datos.usuario_ape1 || '';
-        document.getElementById('usuario_ape2').value = datos.usuario_ape2 || '';
-        document.getElementById('usuario_tel').value = datos.usuario_tel || '';
-        document.getElementById('usuario_direc').value = datos.usuario_direc || '';
-        document.getElementById('usuario_correo').value = datos.usuario_correo || '';
-        document.getElementById('usuario_dpi').value = datos.usuario_dpi || '';
-        document.getElementById('rol_id').value = datos.rol_id || '';
-
-        // En modo edición, hacer los campos de contraseña opcionales
-        const passwordSection = document.getElementById('password-section');
-        const contraInput = document.getElementById('usuario_contra');
-        const confirmarInput = document.getElementById('confirmar_contra');
-        
-        if (passwordSection && contraInput && confirmarInput) {
-            // Mostrar sección pero hacer campos opcionales
-            passwordSection.style.display = 'block';
-            contraInput.required = false;
-            confirmarInput.required = false;
-            contraInput.placeholder = 'Dejar vacío para mantener contraseña actual';
-            confirmarInput.placeholder = 'Dejar vacío para mantener contraseña actual';
-        }
-        
-        usuarioEditando = datos.usuario_id;
-        
-        if (btnRegistrar) {
-            btnRegistrar.textContent = 'Actualizar Usuario';
-            btnRegistrar.className = 'btn btn-warning px-4'; // Cambiar color a warning
-        }
-        
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        
-        console.log('Formulario llenado para editar usuario ID:', datos.usuario_id);
-    } catch (error) {
-        console.error('Error llenando formulario:', error);
-        Swal.fire('Error', 'Error al cargar datos del usuario', 'error');
-    }
-};
-
-// LIMPIAR TODO
+// Función para limpiar formulario
 const limpiarTodo = () => {
-    if (formUsuario) {
-        formUsuario.reset();
-    }
+    FormularioUsuarios.reset();
+    BtnGuardar.classList.remove('d-none');
+    BtnModificar.classList.add('d-none');
+    FormularioUsuarios.querySelectorAll('.form-control, .form-select').forEach(element => {
+        element.classList.remove('is-valid', 'is-invalid');
+        element.title = '';
+    });
     
-    usuarioEditando = null;
-    
-    if (btnRegistrar) {
-        btnRegistrar.textContent = 'Registrar Usuario';
-        btnRegistrar.className = 'btn btn-success px-4'; // Volver al color verde
-    }
-    
-    // Mostrar sección de contraseñas y hacerlas requeridas
-    const passwordSection = document.getElementById('password-section');
-    const contraInput = document.getElementById('usuario_contra');
-    const confirmarInput = document.getElementById('confirmar_contra');
-    
-    if (passwordSection && contraInput && confirmarInput) {
-        passwordSection.style.display = 'block';
-        contraInput.required = true;
-        confirmarInput.required = true;
-        contraInput.placeholder = 'Mínimo 10 caracteres';
-        confirmarInput.placeholder = 'Confirme su contraseña';
-    }
-    
-    // Limpiar validaciones
-    if (formUsuario) {
-        formUsuario.querySelectorAll('.is-valid, .is-invalid').forEach(el => {
-            el.classList.remove('is-valid', 'is-invalid');
-        });
-    }
-    
-    // Ocultar preview de imagen
     const imagePreview = document.getElementById('imagePreview');
     if (imagePreview) {
         imagePreview.classList.add('d-none');
     }
     
-    console.log('Formulario limpiado');
+    if (usuario_contra && confirmar_contra) {
+        usuario_contra.required = true;
+        confirmar_contra.required = true;
+        usuario_contra.placeholder = 'Mínimo 10 caracteres';
+        confirmar_contra.placeholder = 'Confirme su contraseña';
+    }
 };
 
-// ELIMINAR USUARIO
-const eliminarUsuario = async (e) => {
-    const id = e.currentTarget.dataset.id;
-    const confirmar = await Swal.fire({
-        icon: "warning", 
-        title: "¿Eliminar usuario?", 
-        text: "Esta acción desactivará el usuario.",
-        showCancelButton: true, 
-        confirmButtonText: "Sí, eliminar", 
-        cancelButtonText: "Cancelar",
+// Guardar Usuario
+const GuardarUsuario = async (event) => {
+    event.preventDefault();
+    BtnGuardar.disabled = true;
+
+    const telefonoValido = ValidarTelefono();
+    const dpiValido = ValidarDPI();
+    const contrasenaValida = validarContrasenaSegura();
+    const confirmarContrasenaValida = validarConfirmarContrasena();
+
+    if (!telefonoValido || !dpiValido || !contrasenaValida || !confirmarContrasenaValida) {
+        Swal.fire({
+            position: "center",
+            icon: "info",
+            title: "FORMULARIO INCOMPLETO",
+            text: "Verifique todos los campos",
+            showConfirmButton: true,
+        });
+        BtnGuardar.disabled = false;
+        return;
+    }
+
+    const body = new FormData(FormularioUsuarios);
+    const url = '/empresa_celulares/usuario/guardarAPI';
+    const config = {
+        method: 'POST',
+        body
+    }
+
+    try {
+        const respuesta = await fetch(url, config);
+        const datos = await respuesta.json();
+        const { codigo, mensaje } = datos
+
+        if (codigo == 1) {
+            await Swal.fire({
+                position: "center",
+                icon: "success",
+                title: "¡Éxito!",
+                text: mensaje,
+                showConfirmButton: true,
+            });
+
+            limpiarTodo();
+            await BuscarUsuarios();
+
+        } else {
+            await Swal.fire({
+                position: "center",
+                icon: "info",
+                title: "Error",
+                text: mensaje,
+                showConfirmButton: true,
+            });
+        }
+
+    } catch (error) {
+        console.log(error)
+        await Swal.fire({
+            position: "center",
+            icon: "error",
+            title: "Error de conexión",
+            text: "No se pudo completar la operación",
+            showConfirmButton: true,
+        });
+    }
+    BtnGuardar.disabled = false;
+};
+
+// Buscar Usuarios
+const BuscarUsuarios = async () => {
+    const url = '/empresa_celulares/usuario/buscarAPI';
+    const config = {
+        method: 'GET'
+    }
+
+    try {
+        const respuesta = await fetch(url, config);
+        const datos = await respuesta.json();
+        const { codigo, mensaje, data } = datos
+
+        if (codigo == 1) {
+            await Swal.fire({
+                position: "center",
+                icon: "success",
+                title: "¡Usuarios cargados!",
+                text: `Se cargaron ${data.length} usuario(s) correctamente`,
+                showConfirmButton: true,
+                timer: 2000
+            });
+
+            datatable.clear().draw();
+            datatable.rows.add(data).draw();
+        } else {
+            await Swal.fire({
+                position: "center",
+                icon: "info",
+                title: "Sin datos",
+                text: mensaje,
+                showConfirmButton: true,
+            });
+        }
+
+    } catch (error) {
+        console.log('Error en BuscarUsuarios:', error)
+        await Swal.fire({
+            position: "center",
+            icon: "error",
+            title: "Error de conexión",
+            text: "No se pudieron cargar los usuarios",
+            showConfirmButton: true,
+        });
+    }
+};
+
+// Llenar formulario para modificar
+const llenarFormulario = async (event) => {
+    const datos = event.currentTarget.dataset;
+    const usuarioId = datos.id;
+
+    const url = `/empresa_celulares/usuario/buscarAPI?id=${usuarioId}`;
+    const config = {
+        method: 'GET'
+    }
+
+    try {
+        const respuesta = await fetch(url, config);
+        const resultado = await respuesta.json();
+        const { codigo, mensaje, data } = resultado;
+
+        if (codigo == 1 && data.length > 0) {
+            const usuario = data[0];
+            
+            document.getElementById('usuario_id').value = usuarioId;
+            document.getElementById('usuario_nom1').value = usuario.usuario_nom1;
+            document.getElementById('usuario_nom2').value = usuario.usuario_nom2;
+            document.getElementById('usuario_ape1').value = usuario.usuario_ape1;
+            document.getElementById('usuario_ape2').value = usuario.usuario_ape2;
+            document.getElementById('usuario_tel').value = usuario.usuario_tel;
+            document.getElementById('usuario_direc').value = usuario.usuario_direc;
+            document.getElementById('usuario_dpi').value = usuario.usuario_dpi;
+            document.getElementById('usuario_correo').value = usuario.usuario_correo;
+            document.getElementById('rol_id').value = usuario.rol_id;
+            
+            document.getElementById('usuario_contra').value = '';
+            document.getElementById('confirmar_contra').value = '';
+            
+            if (usuario_contra && confirmar_contra) {
+                usuario_contra.required = false;
+                confirmar_contra.required = false;
+                usuario_contra.placeholder = 'Dejar vacío para mantener contraseña actual';
+                confirmar_contra.placeholder = 'Dejar vacío para mantener contraseña actual';
+            }
+            
+            BtnGuardar.classList.add('d-none');
+            BtnModificar.classList.remove('d-none');
+            
+            window.scrollTo({
+                top: 0
+            });
+
+        } else {
+            await Swal.fire({
+                position: "center",
+                icon: "error",
+                title: "Error",
+                text: mensaje,
+                showConfirmButton: true,
+            });
+        }
+
+    } catch (error) {
+        console.log('Error completo:', error);
+        
+        await Swal.fire({
+            position: "center",
+            icon: "error",
+            title: "Error de conexión",
+            text: "No se pudo cargar el usuario",
+            showConfirmButton: true,
+        });
+    }
+};
+
+// Modificar Usuario
+const ModificarUsuario = async (event) => {
+    event.preventDefault();
+    BtnModificar.disabled = true;
+
+    const body = new FormData(FormularioUsuarios);
+    const url = '/empresa_celulares/usuario/modificarAPI';
+    const config = {
+        method: 'POST',
+        body
+    }
+
+    try {
+        const respuesta = await fetch(url, config);
+        const datos = await respuesta.json();
+        const { codigo, mensaje } = datos
+
+        if (codigo == 1) {
+            await Swal.fire({
+                position: "center",
+                icon: "success",
+                title: "¡Éxito!",
+                text: mensaje,
+                showConfirmButton: true,
+            });
+
+            limpiarTodo();
+            await BuscarUsuarios();
+
+        } else {
+            await Swal.fire({
+                position: "center",
+                icon: "info",
+                title: "Error",
+                text: mensaje,
+                showConfirmButton: true,
+            });
+        }
+
+    } catch (error) {
+        console.log(error)
+        await Swal.fire({
+            position: "center",
+            icon: "error",
+            title: "Error de conexión",
+            text: "No se pudo completar la modificación",
+            showConfirmButton: true,
+        });
+    }
+    BtnModificar.disabled = false;
+};
+
+// Eliminar Usuario
+const EliminarUsuarios = async (e) => {
+    const idUsuario = e.currentTarget.dataset.id
+
+    const AlertaConfirmarEliminar = await Swal.fire({
+        position: "center",
+        icon: "question",
+        title: "¿Desea ejecutar esta acción?",
+        text: 'Está completamente seguro que desea eliminar este registro',
+        showConfirmButton: true,
+        confirmButtonText: 'Sí, Eliminar',
+        confirmButtonColor: '#d33',
+        cancelButtonText: 'No, Cancelar',
+        showCancelButton: true
     });
 
-    if (confirmar.isConfirmed) {
+    if (AlertaConfirmarEliminar.isConfirmed) {
+        const url = `/empresa_celulares/usuario/eliminar?id=${idUsuario}`;
+        const config = {
+            method: 'GET'
+        }
+
         try {
-            const res = await fetch('/empresa_celulares/usuario/eliminarAPI', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ usuario_id: id })
-            });
-            const data = await res.json();
-            if (data.codigo == 1) {
-                Swal.fire({ icon: "success", title: "Eliminado", text: data.mensaje });
-                buscarUsuarios();
+            const consulta = await fetch(url, config);
+            const respuesta = await consulta.json();
+            const { codigo, mensaje } = respuesta;
+
+            if (codigo == 1) {
+                await Swal.fire({
+                    position: "center",
+                    icon: "success",
+                    title: "¡Éxito!",
+                    text: mensaje,
+                    showConfirmButton: true,
+                });
+                
+                await BuscarUsuarios();
             } else {
-                Swal.fire({ icon: "error", title: "Error", text: data.mensaje });
+                await Swal.fire({
+                    position: "center",
+                    icon: "error",
+                    title: "Error",
+                    text: mensaje,
+                    showConfirmButton: true,
+                });
             }
+
         } catch (error) {
-            console.error('Error eliminando usuario:', error);
-            Swal.fire('Error', 'Error al eliminar usuario', 'error');
+            console.log(error)
+            await Swal.fire({
+                position: "center",
+                icon: "error",
+                title: "Error de conexión",
+                text: "No se pudo completar la eliminación",
+                showConfirmButton: true,
+            });
         }
     }
 };
 
-// EVENT LISTENERS PRINCIPALES
+// Configurar DataTable
+const datatable = new DataTable('#TableUsuarios', {
+    dom: `
+        <"row mt-3 justify-content-between" 
+            <"col" l> 
+            <"col" B> 
+            <"col-3" f>
+        >
+        t
+        <"row mt-3 justify-content-between" 
+            <"col-md-3 d-flex align-items-center" i> 
+            <"col-md-8 d-flex justify-content-end" p>
+        >
+    `,
+    language: lenguaje,
+    data: [],
+    columns: [
+        {
+            title: 'No.',
+            data: 'usuario_id',
+            width: '%',
+            render: (data, type, row, meta) => meta.row + 1
+        },
+        { 
+            title: 'Nombres', 
+            data: 'usuario_nom1'
+        },
+        { 
+            title: 'Apellidos', 
+            data: 'usuario_ape1'
+        },
+        { 
+            title: 'Teléfono', 
+            data: 'usuario_tel' 
+        },
+        { 
+            title: 'DPI', 
+            data: 'usuario_dpi' 
+        },
+        { 
+            title: 'Correo', 
+            data: 'usuario_correo' 
+        },
+        { 
+            title: 'Rol', 
+            data: 'rol_nombre' 
+        },
+        { 
+            title: 'Foto', 
+            data: 'usuario_fotografia',
+            searchable: false,
+            orderable: false,
+            render: (data, type, row) => {
+                if (data && data.trim() !== '') {
+                    // Crear la URL completa de la imagen
+                    const imageUrl = `/empresa_celulares/storage/fotos_usuarios/${data}`;
+                    return `<img src="${imageUrl}" alt="Foto de usuario" style="height: 50px; width: 50px; border-radius: 50%; object-fit: cover;" 
+                            onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjUiIGN5PSIyNSIgcj0iMjUiIGZpbGw9IiM2Yzc1N2QiLz4KPGNpcmNsZSBjeD0iMjUiIGN5PSIyMCIgcj0iNSIgZmlsbD0iI2ZmZmZmZiIvPgo8cGF0aCBkPSJNMzUgMzVBMTAgMTAgMCAwIDAgMTUgMzUiIGZpbGw9IiNmZmZmZmYiLz4KPC9zdmc+Cg==';">`;
+                } else {
+                    return `<i class="bi bi-person-fill text-muted" style="font-size: 30px;"></i>`;
+                }
+            }
+        },
+        {
+            title: 'Acciones',
+            data: 'usuario_id',
+            searchable: false,
+            orderable: false,
+            render: (data, type, row, meta) => {
+                return `
+                 <div class='d-flex justify-content-center'>
+                     <button class='btn btn-warning modificar mx-1' 
+                         data-id="${data}">   
+                         <i class='bi bi-pencil-square me-1'></i> Modificar
+                     </button>
+                     <button class='btn btn-danger eliminar mx-1' 
+                         data-id="${data}">
+                        <i class="bi bi-trash3 me-1"></i>Eliminar
+                     </button>
+                 </div>`;
+            }
+        }
+    ]
+});
+
+// Eventos
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM cargado, inicializando módulo usuario...');
-    
-    // Inicializar componentes
-    inicializarTabla();
+    // Cargar datos iniciales
     cargarRoles();
-    buscarUsuarios();
+    BuscarUsuarios();
     
-    // Event listeners del formulario
-    if (formUsuario) {
-        formUsuario.addEventListener('submit', guardarUsuario);
-        console.log('Event listener del formulario agregado');
-    } else {
-        console.error('Formulario userForm no encontrado');
-    }
+    // Validaciones
+    if (usuario_tel) usuario_tel.addEventListener('change', ValidarTelefono);
+    if (usuario_dpi) usuario_dpi.addEventListener('change', ValidarDPI);
+    if (usuario_contra) usuario_contra.addEventListener('input', validarContrasenaSegura);
+    if (confirmar_contra) confirmar_contra.addEventListener('change', validarConfirmarContrasena);
     
-    if (btnLimpiar) {
-        btnLimpiar.addEventListener('click', limpiarTodo);
-    }
-    
-    // Event listener para toggle password
-    const toggleBtn = document.getElementById('togglePassword');
-    if (toggleBtn) {
-        toggleBtn.addEventListener('click', togglePassword);
-    }
-    
-    // Event listeners para validación de contraseña
-    const contraInput = document.getElementById('usuario_contra');
-    const confirmarInput = document.getElementById('confirmar_contra');
-    if (contraInput) contraInput.addEventListener('input', validarContraseña);
-    if (confirmarInput) confirmarInput.addEventListener('input', validarContraseña);
-    
-    // Event listener para preview de imagen
+    // Preview de imagen
     const fotoInput = document.getElementById('usuario_fotografia');
     if (fotoInput) fotoInput.addEventListener('change', previsualizarImagen);
     
-    console.log('Módulo usuario inicializado correctamente');
+    // Eventos de formulario
+    if (FormularioUsuarios) FormularioUsuarios.addEventListener('submit', GuardarUsuario);
+    if (BtnModificar) BtnModificar.addEventListener('click', ModificarUsuario);
+    if (BtnLimpiar) BtnLimpiar.addEventListener('click', limpiarTodo);
+    
+    // Eventos de DataTable
+    datatable.on('click', '.modificar', llenarFormulario);
+    datatable.on('click', '.eliminar', EliminarUsuarios);
+    
+    console.log('Aplicación de usuarios inicializada correctamente');
 });

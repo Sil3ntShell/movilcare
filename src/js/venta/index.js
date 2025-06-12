@@ -1,5 +1,6 @@
-import DataTable from "datatables.net-bs5";
+// venta/index.js
 import Swal from "sweetalert2";
+import DataTable from "datatables.net-bs5";
 import { lenguaje } from "../lenguaje";
 
 // Función de validación simplificada
@@ -39,6 +40,8 @@ const cargarClientes = async () => {
         const data = await respuesta.json();
         
         const selectCliente = document.getElementById('cliente_id');
+        if (!selectCliente) return;
+        
         selectCliente.innerHTML = '<option value="">Seleccione un cliente</option>';
         
         if (data.codigo === 1 && data.data) {
@@ -62,6 +65,8 @@ const cargarProductos = async () => {
         const data = await respuesta.json();
         
         const selectProducto = document.getElementById('producto_id');
+        if (!selectProducto) return;
+        
         selectProducto.innerHTML = '<option value="">Seleccione un producto</option>';
         
         if (data.codigo === 1 && data.data) {
@@ -83,31 +88,80 @@ const cargarProductos = async () => {
 // Cargar servicios disponibles
 const cargarServicios = async () => {
     try {
+        console.log('Iniciando carga de servicios...');
+        
         const respuesta = await fetch('/empresa_celulares/venta/obtenerServiciosAPI');
         const data = await respuesta.json();
         
-        console.log('Respuesta servicios:', data); // Debug
+        console.log('Respuesta completa servicios:', data);
         
         const selectServicio = document.getElementById('servicio_id');
+        if (!selectServicio) {
+            console.error('Elemento servicio_id no encontrado');
+            return;
+        }
+        
         selectServicio.innerHTML = '<option value="">Seleccione un servicio</option>';
         
-        if (data.codigo === 1 && data.data) {
-            console.log('Servicios encontrados:', data.data.length); // Debug
+        if (data.codigo === 1) {
+            console.log('Servicios encontrados:', data.data?.length || 0);
             
-            data.data.forEach(servicio => {
-                const dispositivo = `${servicio.recepcion_marca || ''} ${servicio.recepcion_modelo || ''}`.trim();
+            if (data.data && Array.isArray(data.data) && data.data.length > 0) {
+                data.data.forEach((servicio, index) => {
+                    console.log(`Procesando servicio ${index + 1}:`, servicio);
+                    
+                    const dispositivo = servicio.dispositivo_descripcion || 
+                                      `${servicio.recepcion_marca || ''} ${servicio.recepcion_modelo || ''}`.trim() ||
+                                      servicio.recepcion_tipo_celular || 
+                                      'Dispositivo';
+                    
+                    const descripcionServicio = servicio.tipo_servicio_nombre || 'Servicio';
+                    const costo = parseFloat(servicio.orden_costo_total || 0);
+                    
+                    const option = document.createElement('option');
+                    option.value = servicio.orden_id;
+                    option.textContent = `${descripcionServicio} - ${dispositivo} - Q.${costo.toFixed(2)}`;
+                    option.dataset.precio = costo;
+                    option.dataset.descripcion = `${descripcionServicio} - ${dispositivo}`;
+                    
+                    selectServicio.appendChild(option);
+                    
+                    console.log(`Servicio agregado: ${option.textContent}`);
+                });
+                
+                console.log(`Total de servicios cargados: ${data.data.length}`);
+            } else {
+                console.log('No hay servicios disponibles');
+                
+                // Agregar opción informativa
                 const option = document.createElement('option');
-                option.value = servicio.orden_id;
-                option.textContent = `${servicio.tipo_servicio_nombre} - ${dispositivo} - Q.${parseFloat(servicio.orden_costo_total).toFixed(2)}`;
-                option.dataset.precio = servicio.orden_costo_total;
-                option.dataset.descripcion = `${servicio.tipo_servicio_nombre} - ${dispositivo}`;
+                option.value = '';
+                option.textContent = 'No hay servicios completados disponibles';
+                option.disabled = true;
                 selectServicio.appendChild(option);
-            });
+            }
         } else {
-            console.log('No se encontraron servicios o error en la respuesta');
+            console.error('Error en la respuesta:', data.mensaje);
+            
+            // Agregar opción de error
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = 'Error al cargar servicios';
+            option.disabled = true;
+            selectServicio.appendChild(option);
         }
+        
     } catch (error) {
         console.error('Error cargando servicios:', error);
+        
+        const selectServicio = document.getElementById('servicio_id');
+        if (selectServicio) {
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = 'Error de conexión';
+            option.disabled = true;
+            selectServicio.appendChild(option);
+        }
     }
 };
 
@@ -115,6 +169,8 @@ const cargarServicios = async () => {
 const agregarProducto = () => {
     const selectProducto = document.getElementById('producto_id');
     const cantidadInput = document.getElementById('cantidad_producto');
+    
+    if (!selectProducto || !cantidadInput) return;
     
     const selectedOption = selectProducto.selectedOptions[0];
     const cantidad = parseInt(cantidadInput.value) || 1;
@@ -173,6 +229,8 @@ const agregarProducto = () => {
 const agregarServicio = () => {
     const selectServicio = document.getElementById('servicio_id');
     
+    if (!selectServicio) return;
+    
     const selectedOption = selectServicio.selectedOptions[0];
     
     if (!selectedOption || selectedOption.value === '') {
@@ -213,6 +271,8 @@ const agregarServicio = () => {
 // Actualizar tabla de detalle
 const actualizarTablaDetalle = () => {
     const tbody = TablaDetalle.querySelector('tbody');
+    if (!tbody) return;
+    
     tbody.innerHTML = '';
     
     if (detalleVenta.length === 0) {
@@ -281,6 +341,8 @@ const actualizarTablaDetalle = () => {
 // Obtener stock de un producto
 const getStockProducto = (inventarioId) => {
     const selectProducto = document.getElementById('producto_id');
+    if (!selectProducto) return 0;
+    
     const option = selectProducto.querySelector(`option[value="${inventarioId}"]`);
     return option ? parseInt(option.dataset.stock) : 0;
 };
@@ -295,21 +357,27 @@ const eliminarItem = (index) => {
 // Calcular totales
 const calcularTotales = () => {
     const subtotal = detalleVenta.reduce((sum, item) => sum + item.subtotal, 0);
-    const descuento = parseFloat(document.getElementById('venta_descuento_input').value) || 0;
-    const impuestos = parseFloat(document.getElementById('venta_impuestos_input').value) || 0;
+    const descuento = parseFloat(document.getElementById('venta_descuento_input')?.value) || 0;
+    const impuestos = parseFloat(document.getElementById('venta_impuestos_input')?.value) || 0;
     const total = subtotal - descuento + impuestos;
     
     // Actualizar campos hidden
-    document.getElementById('venta_subtotal').value = subtotal.toFixed(2);
-    document.getElementById('venta_descuento').value = descuento.toFixed(2);
-    document.getElementById('venta_impuestos').value = impuestos.toFixed(2);
-    document.getElementById('venta_total').value = total.toFixed(2);
+    const subtotalField = document.getElementById('venta_subtotal');
+    const descuentoField = document.getElementById('venta_descuento');
+    const impuestosField = document.getElementById('venta_impuestos');
+    const totalField = document.getElementById('venta_total');
+    
+    if (subtotalField) subtotalField.value = subtotal.toFixed(2);
+    if (descuentoField) descuentoField.value = descuento.toFixed(2);
+    if (impuestosField) impuestosField.value = impuestos.toFixed(2);
+    if (totalField) totalField.value = total.toFixed(2);
     
     // Actualizar visualización
-    document.getElementById('subtotal_display').textContent = `Q. ${subtotal.toFixed(2)}`;
-    if (document.getElementById('total_display')) {
-        document.getElementById('total_display').textContent = `Q. ${total.toFixed(2)}`;
-    }
+    const subtotalDisplay = document.getElementById('subtotal_display');
+    const totalDisplay = document.getElementById('total_display');
+    
+    if (subtotalDisplay) subtotalDisplay.textContent = `Q. ${subtotal.toFixed(2)}`;
+    if (totalDisplay) totalDisplay.textContent = `Q. ${total.toFixed(2)}`;
 };
 
 // Guardar venta
@@ -329,7 +397,7 @@ const GuardarVenta = async (event) => {
         return;
     }
     
-    const clienteId = document.getElementById('cliente_id').value;
+    const clienteId = document.getElementById('cliente_id')?.value;
     if (!clienteId) {
         Swal.fire('Error', 'Debe seleccionar un cliente', 'error');
         BtnGuardar.disabled = false;
@@ -373,17 +441,17 @@ const GuardarVenta = async (event) => {
 const BuscarVentas = async () => {
     try {
         const res = await fetch('/empresa_celulares/venta/buscarAPI');
-        const { codigo, mensaje, data } = await res.json();
+        const data = await res.json();
         
-        if (codigo == 1) {
+        if (data.codigo == 1) {
             if (typeof datatable !== 'undefined') {
                 datatable.clear().draw();
-                if (data && Array.isArray(data)) {
-                    datatable.rows.add(data).draw();
+                if (data.data && Array.isArray(data.data)) {
+                    datatable.rows.add(data.data).draw();
                 }
             }
         } else {
-            console.error('Error buscando ventas:', mensaje);
+            console.error('Error buscando ventas:', data.mensaje);
         }
     } catch (error) {
         console.error('Error buscando ventas:', error);
@@ -497,19 +565,43 @@ const verDetalle = async (e) => {
         
         if (codigo === 1) {
             const venta = data.find(v => v.venta_id == id);
-            if (venta && venta.detalle) {
+            if (venta) {
+                // Si no hay detalle en la respuesta, obtenerlo directamente
+                let detalle = venta.detalle || [];
+                
+                // Si el detalle está vacío, hacer una consulta específica
+                if (detalle.length === 0) {
+                    try {
+                        const detalleRes = await fetch(`/empresa_celulares/venta/obtenerDetalleAPI?venta_id=${id}`);
+                        const detalleData = await detalleRes.json();
+                        if (detalleData.codigo === 1) {
+                            detalle = detalleData.data;
+                        }
+                    } catch (error) {
+                        console.log('No se pudo obtener detalle específico');
+                    }
+                }
+                
                 let detalleHtml = '<table class="table table-sm"><thead><tr><th>Descripción</th><th>Cant.</th><th>Precio</th><th>Subtotal</th></tr></thead><tbody>';
                 
-                venta.detalle.forEach(item => {
+                if (detalle.length > 0) {
+                    detalle.forEach(item => {
+                        detalleHtml += `
+                            <tr>
+                                <td>${item.detalle_descripcion || 'Sin descripción'}</td>
+                                <td class="text-center">${item.detalle_cantidad || 0}</td>
+                                <td class="text-end">Q. ${parseFloat(item.detalle_precio_unitario || 0).toFixed(2)}</td>
+                                <td class="text-end">Q. ${parseFloat(item.detalle_subtotal || 0).toFixed(2)}</td>
+                            </tr>
+                        `;
+                    });
+                } else {
                     detalleHtml += `
                         <tr>
-                            <td>${item.item_descripcion}</td>
-                            <td class="text-center">${item.detalle_cantidad}</td>
-                            <td class="text-end">Q. ${parseFloat(item.detalle_precio_unitario).toFixed(2)}</td>
-                            <td class="text-end">Q. ${parseFloat(item.detalle_subtotal).toFixed(2)}</td>
+                            <td colspan="4" class="text-center text-muted">No hay detalle disponible</td>
                         </tr>
                     `;
-                });
+                }
                 
                 detalleHtml += '</tbody></table>';
                 
@@ -523,6 +615,11 @@ const verDetalle = async (e) => {
         }
     } catch (error) {
         console.error('Error obteniendo detalle:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'No se pudo obtener el detalle de la venta'
+        });
     }
 };
 
@@ -538,7 +635,10 @@ const limpiarTodo = () => {
     });
     
     // Resetear fecha actual
-    document.getElementById('venta_fecha').value = new Date().toISOString().split('T')[0];
+    const fechaInput = document.getElementById('venta_fecha');
+    if (fechaInput) {
+        fechaInput.value = new Date().toISOString().split('T')[0];
+    }
 };
 
 // Eliminar venta
@@ -560,12 +660,12 @@ const EliminarVenta = async (e) => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ venta_id: id })
             });
-            const { codigo, mensaje } = await res.json();
-            if (codigo == 1) {
-                Swal.fire({ icon: "success", title: "Eliminado", text: mensaje });
+            const data = await res.json();
+            if (data.codigo == 1) {
+                Swal.fire({ icon: "success", title: "Eliminado", text: data.mensaje });
                 BuscarVentas();
             } else {
-                Swal.fire({ icon: "error", title: "Error", text: mensaje });
+                Swal.fire({ icon: "error", title: "Error", text: data.mensaje });
             }
         } catch (error) {
             console.error(error);
@@ -600,95 +700,15 @@ const CambiarEstado = async (e) => {
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: `venta_id=${id}&nuevo_estado=${nuevoEstado}`
             });
-            const { codigo, mensaje } = await res.json();
-            if (codigo == 1) {
-                Swal.fire({ icon: "success", title: "Estado actualizado", text: mensaje });
+            const data = await res.json();
+            if (data.codigo == 1) {
+                Swal.fire({ icon: "success", title: "Estado actualizado", text: data.mensaje });
                 BuscarVentas();
             } else {
-                Swal.fire({ icon: "error", title: "Error", text: mensaje });
+                Swal.fire({ icon: "error", title: "Error", text: data.mensaje });
             }
         } catch (error) {
             console.error(error);
-        }
-    }
-};
-
-// Cargar servicios disponibles
-const cargarServicios = async () => {
-    try {
-        console.log('Iniciando carga de servicios...');
-        
-        const respuesta = await fetch('/empresa_celulares/venta/obtenerServiciosAPI');
-        const data = await respuesta.json();
-        
-        console.log('Respuesta completa servicios:', data);
-        
-        const selectServicio = document.getElementById('servicio_id');
-        if (!selectServicio) {
-            console.error('Elemento servicio_id no encontrado');
-            return;
-        }
-        
-        selectServicio.innerHTML = '<option value="">Seleccione un servicio</option>';
-        
-        if (data.codigo === 1) {
-            console.log('Servicios encontrados:', data.data?.length || 0);
-            
-            if (data.data && Array.isArray(data.data) && data.data.length > 0) {
-                data.data.forEach((servicio, index) => {
-                    console.log(`Procesando servicio ${index + 1}:`, servicio);
-                    
-                    const dispositivo = servicio.dispositivo_descripcion || 
-                                      `${servicio.recepcion_marca || ''} ${servicio.recepcion_modelo || ''}`.trim() ||
-                                      servicio.recepcion_tipo_celular || 
-                                      'Dispositivo';
-                    
-                    const descripcionServicio = servicio.tipo_servicio_nombre || 'Servicio';
-                    const costo = parseFloat(servicio.orden_costo_total || 0);
-                    
-                    const option = document.createElement('option');
-                    option.value = servicio.orden_id;
-                    option.textContent = `${descripcionServicio} - ${dispositivo} - Q.${costo.toFixed(2)}`;
-                    option.dataset.precio = costo;
-                    option.dataset.descripcion = `${descripcionServicio} - ${dispositivo}`;
-                    
-                    selectServicio.appendChild(option);
-                    
-                    console.log(`Servicio agregado: ${option.textContent}`);
-                });
-                
-                console.log(`Total de servicios cargados: ${data.data.length}`);
-            } else {
-                console.log('No hay servicios disponibles');
-                
-                // Agregar opción informativa
-                const option = document.createElement('option');
-                option.value = '';
-                option.textContent = 'No hay servicios completados disponibles';
-                option.disabled = true;
-                selectServicio.appendChild(option);
-            }
-        } else {
-            console.error('Error en la respuesta:', data.mensaje);
-            
-            // Agregar opción de error
-            const option = document.createElement('option');
-            option.value = '';
-            option.textContent = 'Error al cargar servicios';
-            option.disabled = true;
-            selectServicio.appendChild(option);
-        }
-        
-    } catch (error) {
-        console.error('Error cargando servicios:', error);
-        
-        const selectServicio = document.getElementById('servicio_id');
-        if (selectServicio) {
-            const option = document.createElement('option');
-            option.value = '';
-            option.textContent = 'Error de conexión';
-            option.disabled = true;
-            selectServicio.appendChild(option);
         }
     }
 };
@@ -713,7 +733,7 @@ document.addEventListener('DOMContentLoaded', () => {
     BuscarVentas();
     
     // Event listeners del formulario
-    FormularioVenta.addEventListener('submit', GuardarVenta);
+    if (FormularioVenta) FormularioVenta.addEventListener('submit', GuardarVenta);
     if (BtnLimpiar) BtnLimpiar.addEventListener('click', limpiarTodo);
     
     // Event listeners para agregar items

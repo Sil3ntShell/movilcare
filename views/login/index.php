@@ -1,94 +1,70 @@
-
-    <div class="container py-5">
-        <div class="row justify-content-center">
-            <div class="col-md-8 col-lg-6">
-                <div class="card shadow">
-                    <div class="card-header bg-primary text-white">
-                        <h4 class="card-title mb-0">
+<div class="row justify-content-center">
+    <div class="col-lg-4 col-md-6 col-sm-8">
+        <div class="card shadow-lg border-0 rounded-lg mt-5">
+            <div class="card-header bg-primary text-white text-center py-4">
+                <h3 class="font-weight-light mb-0">
+                    <i class="bi bi-phone me-2"></i>MovilCare
+                </h3>
+                <p class="mb-0">Sistema de Gestión de Celulares</p>
+            </div>
+            <div class="card-body p-5">
+                <form id="formularioLogin">
+                    <div class="mb-3">
+                        <label class="form-label" for="usu_codigo">
+                            <i class="bi bi-person-vcard me-2"></i>DPI
+                        </label>
+                        <input 
+                            class="form-control" 
+                            id="usu_codigo" 
+                            name="usu_codigo" 
+                            type="text" 
+                            placeholder="Ingrese su DPI" 
+                            maxlength="13"
+                            required
+                        />
+                        <div class="invalid-feedback">
+                            Por favor ingrese un DPI válido
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label" for="usu_password">
+                            <i class="bi bi-key me-2"></i>Contraseña
+                        </label>
+                        <div class="input-group">
+                            <input 
+                                class="form-control" 
+                                id="usu_password" 
+                                name="usu_password" 
+                                type="password" 
+                                placeholder="Ingrese su contraseña"
+                                required
+                            />
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                <i class="bi bi-eye" id="eyeIcon"></i>
+                            </button>
+                        </div>
+                        <div class="invalid-feedback">
+                            Por favor ingrese su contraseña
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button class="btn btn-primary btn-lg" type="submit" id="btnLogin">
                             <i class="bi bi-box-arrow-in-right me-2"></i>
                             Iniciar Sesión
-                        </h4>
+                        </button>
                     </div>
-                    <div class="card-body">
-                        <p class="text-muted mb-4 text-center">Por favor ingresa tus credenciales</p>
-                        
-                        <form id="loginForm" novalidate>
-                          
-                            <!-- Correo Electrónico -->
-                            <div class="mb-3">
-                                <label for="usuario_correo" class="form-label">
-                                    Correo Electrónico <span class="text-danger">*</span>
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-text">
-                                        <i class="bi bi-envelope"></i>
-                                    </span>
-                                    <input type="email" class="form-control" id="usuario_correo" name="usuario_correo" 
-                                           required placeholder="ejemplo@correo.com">
-                                    <div class="invalid-feedback">
-                                        Por favor ingrese un correo electrónico válido.
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Contraseña -->
-                            <div class="mb-4">
-                                <label for="usuario_contra" class="form-label">
-                                    Contraseña <span class="text-danger">*</span>
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-text">
-                                        <i class="bi bi-lock"></i>
-                                    </span>
-                                    <input type="password" class="form-control" id="usuario_contra" name="usuario_contra" 
-                                           required placeholder="Ingresa tu contraseña">
-                                    <button class="btn btn-outline-secondary" type="button" id="togglePassword">
-                                        <i class="bi bi-eye" id="toggleIcon"></i>
-                                    </button>
-                                    <div class="invalid-feedback">
-                                        Por favor ingrese su contraseña.
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Esto es por si olvido la contraseña -->
-                            <!-- <p class="small mb-5 pb-lg-2"><a class="text-white-50" href="#!">Forgot password?</a></p> -->
-
-                            <!-- Recordar sesión (opcional) -->
-                            <!-- <div class="mb-3">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="recordar_sesion" name="recordar_sesion">
-                                    <label class="form-check-label" for="recordar_sesion">
-                                        Recordar sesión
-                                    </label>
-                                </div>
-                            </div> -->
-
-                            <!-- Botones -->
-                            <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-primary btn-lg">
-                                    <i class="bi bi-box-arrow-in-right me-1"></i>
-                                    Iniciar Sesión
-                                </button>
-                            </div>
-
-                            <!-- Es para poder registrarse -->
-                            <!-- <div>
-                              <p class="mb-0">Don't have an account? <a href="#!" class="text-white-50 fw-bold">Sign Up</a>
-                              </p>
-                            </div> -->
-
-                            <!-- Es para iniciar sesion con facebook, twitter y google  -->
-                            <!-- <div class="d-flex justify-content-center text-center mt-4 pt-1">
-                              <a href="#!" class="text-white"><i class="fab fa-facebook-f fa-lg"></i></a>
-                              <a href="#!" class="text-white"><i class="fab fa-twitter fa-lg mx-4 px-2"></i></a>
-                              <a href="#!" class="text-white"><i class="fab fa-google fa-lg"></i></a>
-                            </div> -->
-
-                        </form>
-                    </div>
+                </form>
+            </div>
+            
+            <div class="card-footer text-center py-3">
+                <div class="small text-muted">
+                    © <?= date('Y') ?> MovilCare - Sistema de Gestión
                 </div>
             </div>
-            <!-- <img src="<?= asset('images/logo.png') ?>" alt="Logo" class="img-fluid mt-3"> -->
         </div>
     </div>
+</div>
+
+<script src="<?= asset('build/js/login/index.js') ?>"></script>

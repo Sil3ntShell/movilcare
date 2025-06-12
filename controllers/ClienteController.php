@@ -11,6 +11,8 @@ class ClienteController extends ActiveRecord
 {
     public static function renderizarPagina(Router $router)
     {
+        //  hasPermission(['permiso1']);
+        
         $router->render('cliente/index', []);
     }
 

@@ -61,47 +61,7 @@ class Usuario extends ActiveRecord
         $this->usuario_ultimo_acceso = $args['usuario_ultimo_acceso'] ?? null;
     }
 
-    /**
-     * Validaciones antes de guardar
-     */
-    public function validar()
-    {
-        $errores = [];
-
-        if (!$this->usuario_nom1) {
-            $errores[] = 'El primer nombre es obligatorio';
-        }
-
-        if (!$this->usuario_ape1) {
-            $errores[] = 'El primer apellido es obligatorio';
-        }
-
-        if (!$this->usuario_tel) {
-            $errores[] = 'El teléfono es obligatorio';
-        }
-
-        if (!$this->usuario_dpi) {
-            $errores[] = 'El DPI es obligatorio';
-        }
-
-        if (!$this->usuario_correo) {
-            $errores[] = 'El correo es obligatorio';
-        }
-
-        if (!$this->usuario_direc) {
-            $errores[] = 'La dirección es obligatoria';
-        }
-
-        if (!$this->rol_id) {
-            $errores[] = 'El rol es obligatorio';
-        }
-
-        return $errores;
-    }
-
-    /**
-     * Verificar si existe usuario con correo o DPI
-     */
+    // MÉTODO CORREGIDO - Este era el problema principal
     public static function verificarUsuarioExistente($correo, $dpi, $excluirId = null)
     {
         try {
@@ -118,80 +78,74 @@ class Usuario extends ActiveRecord
 
             $sql = "
                 SELECT 
-                    (SELECT COUNT(*) FROM usuario WHERE $condCorreo) AS correo_existe,
+                    (SELECT COUNT(*) FROM usuario WHERE $condCorreo) AS email_existe,
                     (SELECT COUNT(*) FROM usuario WHERE $condDpi) AS dpi_existe
             ";
 
             $resultado = self::fetchArray($sql);
-            return $resultado[0] ?? ['correo_existe' => 0, 'dpi_existe' => 0];
-
-        } catch (\Exception $e) {
-            // Fallback en caso de error
-            return ['correo_existe' => false, 'dpi_existe' => false];
-        }
-    }
-
-    /**
-     * Buscar el primer registro que coincida con la consulta
-     */
-    public static function fetchFirst($query, $params = [])
-    {
-        try {
-            $db = self::$db;
-            $stmt = $db->prepare($query);
-            $stmt->execute($params);
-            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
             
-            return $result ?: null;
-            
-        } catch (\Exception $e) {
-            return null;
-        }
-    }
-
-    /**
-     * Obtener usuario por ID
-     */
-    public static function obtenerPorId($id)
-    {
-        try {
-            $query = "SELECT * FROM " . static::$tabla . " WHERE " . static::$idTabla . " = ?";
-            $resultado = self::fetchFirst($query, [$id]);
-            
-            if ($resultado) {
-                return new static($resultado);
+            // ASEGURAR que siempre retorne la estructura correcta
+            if (!empty($resultado) && isset($resultado[0])) {
+                return [
+                    'email_existe' => intval($resultado[0]['email_existe']),
+                    'dpi_existe' => intval($resultado[0]['dpi_existe'])
+                ];
+            } else {
+                return ['email_existe' => 0, 'dpi_existe' => 0];
             }
-            
-            return null;
-            
+
         } catch (\Exception $e) {
-            return null;
+            error_log("Error en verificarUsuarioExistente: " . $e->getMessage());
+            // Fallback seguro en caso de error
+            return ['email_existe' => 0, 'dpi_existe' => 0];
         }
     }
 
-    /**
-     * Obtener usuario activo por ID
-     */
-    public static function obtenerUsuarioActivo($id)
+    public static function EliminarUsuario($id)
     {
-        try {
-            $query = "SELECT * FROM " . static::$tabla . " WHERE " . static::$idTabla . " = ? AND usuario_situacion = 1";
-            $resultado = self::fetchFirst($query, [$id]);
-            
-            if ($resultado) {
-                return new static($resultado);
-            }
-            
-            return null;
-            
-        } catch (\Exception $e) {
-            return null;
-        }
+        $sql = "UPDATE " . self::$tabla . " SET usuario_situacion = 0 WHERE " . self::$idTabla . " = " . intval($id);
+        return self::$db->exec($sql);
     }
 
-    /**
-     * Sanear cadena de entrada
-     */
+    // Obtener todos los usuarios activos para selects
+    public static function obtenerUsuarioActivos()
+    {
+        $sql = "SELECT 
+                usuario_id,
+                CONCAT(usuario_nom1, ' ', usuario_ape1) AS usuario_nombre_completo
+                FROM usuario
+                WHERE usuario_situacion = 1
+                ORDER BY usuario_nom1 ASC";
+        
+        return self::fetchArray($sql);
+    }
+
+    // Método para obtener usuarios con información de rol - NUEVO
+    public static function obtenerUsuariosConRol()
+    {
+        $sql = "SELECT 
+                u.usuario_id,
+                u.usuario_nom1,
+                u.usuario_nom2,
+                u.usuario_ape1,
+                u.usuario_ape2,
+                u.usuario_tel,
+                u.usuario_direc,
+                u.usuario_dpi,
+                u.usuario_correo,
+                u.usuario_fotografia,
+                u.usuario_situacion,
+                u.rol_id,
+                r.rol_nombre
+              FROM usuario u
+              LEFT JOIN rol r ON u.rol_id = r.rol_id
+              WHERE u.usuario_situacion = 1
+              ORDER BY u.usuario_id DESC";
+        
+        return self::fetchArray($sql);
+    }
+
+    // Sanitizar cadenas de entrada
     private static function sanitizarCadena($valor)
     {
         return htmlspecialchars(trim($valor), ENT_QUOTES, 'UTF-8');

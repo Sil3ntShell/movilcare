@@ -127,7 +127,7 @@
         </div>
         <div class="card-body p-4">
           <div class="table-responsive">
-            <table class="table table-striped table-hover table-bordered w-100 table-sm" id="tablaUsuarios"></table>
+            <table class="table table-striped table-hover table-bordered w-100 table-sm" id="TableUsuarios"></table>
           </div>
         </div>
       </div>

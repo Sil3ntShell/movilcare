@@ -12,8 +12,8 @@
         <input type="text" class="form-control" id="empleado_nom1" name="empleado_nom1" required maxlength="50" placeholder="Ej. Juan">
       </div>
       <div class="col-md-6">
-        <label for="empleado_nom2" class="form-label">Segundo Nombre <span class="text-danger">*</span></label>
-        <input type="text" class="form-control" id="empleado_nom2" name="empleado_nom2" required maxlength="50" placeholder="Ej. Carlos">
+        <label for="empleado_nom2" class="form-label">Segundo Nombre</label>
+        <input type="text" class="form-control" id="empleado_nom2" name="empleado_nom2" maxlength="50" placeholder="Ej. Carlos">
       </div>
     </div>
 
@@ -24,8 +24,8 @@
         <input type="text" class="form-control" id="empleado_ape1" name="empleado_ape1" required maxlength="50" placeholder="Ej. Pérez">
       </div>
       <div class="col-md-6">
-        <label for="empleado_ape2" class="form-label">Segundo Apellido <span class="text-danger">*</span></label>
-        <input type="text" class="form-control" id="empleado_ape2" name="empleado_ape2" required maxlength="50" placeholder="Ej. García">
+        <label for="empleado_ape2" class="form-label">Segundo Apellido</label>
+        <input type="text" class="form-control" id="empleado_ape2" name="empleado_ape2" maxlength="50" placeholder="Ej. García">
       </div>
     </div>
 
@@ -72,6 +72,10 @@
           <option value="Vendedor">Vendedor</option>
           <option value="Atención al Cliente">Atención al Cliente</option>
           <option value="Administrador">Administrador</option>
+          <option value="Gerente">Gerente</option>
+          <option value="Supervisor">Supervisor</option>
+          <option value="Recepcionista">Recepcionista</option>
+          <option value="Contador">Contador</option>
           <option value="Otro">Otro</option>
         </select>
       </div>

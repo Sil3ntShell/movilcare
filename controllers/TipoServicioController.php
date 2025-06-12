@@ -14,101 +14,56 @@ class TipoServicioController extends ActiveRecord
         $router->render('tiposervicio/index', []);
     }
 
-    /**
-     * API para buscar tipos de servicio
-     */
     public static function buscarAPI()
     {
-        ob_clean();
-        
         try {
-            $query = "SELECT 
-                        tipo_servicio_id,
-                        tipo_servicio_nombre,
-                        tipo_servicio_descripcion,
-                        tipo_servicio_precio_base,
-                        tipo_servicio_tiempo_estimado,
-                        tipo_servicio_situacion
-                      FROM tipo_servicio 
-                      WHERE tipo_servicio_situacion = 1
-                      ORDER BY tipo_servicio_nombre ASC";
-                      
-            $tiposServicio = self::fetchArray($query);
-            
-            // Procesar datos adicionales
-            foreach ($tiposServicio as &$tipo) {
-                // Formatear precio
-                $tipo['precio_formateado'] = 'Q. ' . number_format($tipo['tipo_servicio_precio_base'], 2);
-                
-                // Formatear tiempo
-                $minutos = $tipo['tipo_servicio_tiempo_estimado'];
-                if ($minutos < 60) {
-                    $tipo['tiempo_formateado'] = $minutos . ' min';
-                } else if ($minutos < 1440) {
-                    $horas = floor($minutos / 60);
-                    $mins = $minutos % 60;
-                    $tipo['tiempo_formateado'] = $horas . 'h' . ($mins > 0 ? ' ' . $mins . 'm' : '');
-                } else {
-                    $dias = floor($minutos / 1440);
-                    $horasRestantes = floor(($minutos % 1440) / 60);
-                    $tipo['tiempo_formateado'] = $dias . ' días' . ($horasRestantes > 0 ? ' ' . $horasRestantes . 'h' : '');
-                }
-            }
-            
-            header('Content-Type: application/json; charset=utf-8');
+            $condiciones = ["tipo_servicio_situacion = 1"];
+            $where = implode(" AND ", $condiciones);
+            $sql = "SELECT * FROM tipo_servicio WHERE $where ORDER BY tipo_servicio_nombre ASC";
+            $data = self::fetchArray($sql);
+
+            http_response_code(200);
             echo json_encode([
                 'codigo' => 1,
-                'mensaje' => 'Tipos de servicio encontrados',
-                'data' => $tiposServicio
+                'mensaje' => 'Tipos de servicio obtenidos correctamente',
+                'data' => $data
             ]);
-            
+
         } catch (Exception $e) {
-            header('Content-Type: application/json; charset=utf-8');
+            http_response_code(400);
             echo json_encode([
                 'codigo' => 0,
-                'mensaje' => 'Error al cargar tipos de servicio',
-                'detalle' => $e->getMessage()
+                'mensaje' => 'Error al obtener los tipos de servicio',
+                'detalle' => $e->getMessage(),
             ]);
         }
-        exit();
     }
 
-    /**
-     * API para guardar tipo de servicio
-     */
     public static function guardarAPI()
     {
-        ob_clean();
-        
+        getHeadersApi();
+
+        // Validaciones básicas
+        if (empty($_POST['tipo_servicio_nombre'])) {
+            http_response_code(400);
+            echo json_encode(['codigo' => 0, 'mensaje' => 'El nombre del servicio es obligatorio']);
+            return;
+        }
+
+        if (empty($_POST['tipo_servicio_precio_base']) || !is_numeric($_POST['tipo_servicio_precio_base']) || $_POST['tipo_servicio_precio_base'] <= 0) {
+            http_response_code(400);
+            echo json_encode(['codigo' => 0, 'mensaje' => 'El precio base debe ser un número mayor a 0']);
+            return;
+        }
+
+        if (empty($_POST['tipo_servicio_tiempo_estimado']) || !is_numeric($_POST['tipo_servicio_tiempo_estimado']) || $_POST['tipo_servicio_tiempo_estimado'] <= 0) {
+            http_response_code(400);
+            echo json_encode(['codigo' => 0, 'mensaje' => 'El tiempo estimado debe ser un número mayor a 0']);
+            return;
+        }
+
+        // Crear tipo de servicio
         try {
-            // Validaciones básicas
-            if (empty($_POST['tipo_servicio_nombre'])) {
-                header('Content-Type: application/json; charset=utf-8');
-                echo json_encode(['codigo' => 0, 'mensaje' => 'El nombre del servicio es obligatorio']);
-                exit();
-            }
-
-            if (empty($_POST['tipo_servicio_precio_base']) || !is_numeric($_POST['tipo_servicio_precio_base']) || $_POST['tipo_servicio_precio_base'] <= 0) {
-                header('Content-Type: application/json; charset=utf-8');
-                echo json_encode(['codigo' => 0, 'mensaje' => 'El precio base debe ser un número mayor a 0']);
-                exit();
-            }
-
-            if (empty($_POST['tipo_servicio_tiempo_estimado']) || !is_numeric($_POST['tipo_servicio_tiempo_estimado']) || $_POST['tipo_servicio_tiempo_estimado'] <= 0) {
-                header('Content-Type: application/json; charset=utf-8');
-                echo json_encode(['codigo' => 0, 'mensaje' => 'El tiempo estimado debe ser un número mayor a 0']);
-                exit();
-            }
-
-            // Verificar duplicados
-            $nombreExiste = TipoServicio::verificarNombreExistente($_POST['tipo_servicio_nombre']);
-            if ($nombreExiste) {
-                header('Content-Type: application/json; charset=utf-8');
-                echo json_encode(['codigo' => 0, 'mensaje' => 'Ya existe un servicio con este nombre']);
-                exit();
-            }
-
-            // Crear tipo de servicio
             $tipoServicio = new TipoServicio([
                 'tipo_servicio_nombre' => trim($_POST['tipo_servicio_nombre']),
                 'tipo_servicio_descripcion' => trim($_POST['tipo_servicio_descripcion'] ?? ''),
@@ -117,154 +72,115 @@ class TipoServicioController extends ActiveRecord
                 'tipo_servicio_situacion' => 1
             ]);
 
-            $resultado = $tipoServicio->crear();
-
-            if ($resultado && $resultado['resultado']) {
-                header('Content-Type: application/json; charset=utf-8');
-                echo json_encode([
-                    'codigo' => 1,
-                    'mensaje' => 'Tipo de servicio registrado correctamente'
-                ]);
-            } else {
-                header('Content-Type: application/json; charset=utf-8');
-                echo json_encode([
-                    'codigo' => 0,
-                    'mensaje' => 'Error al guardar tipo de servicio'
-                ]);
-            }
-
-        } catch (Exception $e) {
-            header('Content-Type: application/json; charset=utf-8');
-            echo json_encode([
-                'codigo' => 0,
-                'mensaje' => 'Error: ' . $e->getMessage()
-            ]);
-        }
-        exit();
-    }
-
-    /**
-     * API para actualizar tipo de servicio
-     */
-    public static function actualizarAPI()
-    {
-        ob_clean();
-        
-        try {
-            $tipo_servicio_id = $_POST['tipo_servicio_id'] ?? null;
+            $tipoServicio->crear();
+            echo json_encode(['codigo' => 1, 'mensaje' => 'Tipo de servicio registrado correctamente']);
             
-            if (!$tipo_servicio_id) {
-                header('Content-Type: application/json; charset=utf-8');
-                echo json_encode(['codigo' => 0, 'mensaje' => 'ID inválido']);
-                exit();
-            }
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['codigo' => 0, 'mensaje' => 'Error al guardar', 'detalle' => $e->getMessage()]);
+        }
+    }
 
-            $tipoServicio = TipoServicio::obtenerActivoPorId($tipo_servicio_id);
+    public static function modificarAPI()
+    {
+        getHeadersApi();
+        
+        $id = $_POST['tipo_servicio_id'] ?? null;
+
+        if (!$id) {
+            http_response_code(400);
+            echo json_encode(['codigo' => 0, 'mensaje' => 'ID no proporcionado']);
+            return;
+        }
+
+        // Validaciones básicas (igual que en guardar)
+        if (empty($_POST['tipo_servicio_nombre'])) {
+            http_response_code(400);
+            echo json_encode(['codigo' => 0, 'mensaje' => 'El nombre del servicio es obligatorio']);
+            return;
+        }
+
+        if (empty($_POST['tipo_servicio_precio_base']) || !is_numeric($_POST['tipo_servicio_precio_base']) || $_POST['tipo_servicio_precio_base'] <= 0) {
+            http_response_code(400);
+            echo json_encode(['codigo' => 0, 'mensaje' => 'El precio base debe ser un número mayor a 0']);
+            return;
+        }
+
+        if (empty($_POST['tipo_servicio_tiempo_estimado']) || !is_numeric($_POST['tipo_servicio_tiempo_estimado']) || $_POST['tipo_servicio_tiempo_estimado'] <= 0) {
+            http_response_code(400);
+            echo json_encode(['codigo' => 0, 'mensaje' => 'El tiempo estimado debe ser un número mayor a 0']);
+            return;
+        }
+
+        // ELIMINAR ESTAS LÍNEAS de tu TipoServicioController.php actual:
+        $checkUso = "SELECT COUNT(*) as count FROM orden_trabajo WHERE tipo_servicio_id = " . intval($id) . " AND orden_situacion = 1";
+        $resultUso = self::fetchArray($checkUso);
+
+        if ($resultUso[0]['count'] > 0) {
+            http_response_code(400);
+            echo json_encode(['codigo' => 0, 'mensaje' => 'No se puede modificar: el tipo de servicio está siendo usado en órdenes de trabajo']);
+            return;
+        }
+
+        try {
+            $tipoServicio = TipoServicio::find($id);
+
             if (!$tipoServicio) {
-                header('Content-Type: application/json; charset=utf-8');
+                http_response_code(404);
                 echo json_encode(['codigo' => 0, 'mensaje' => 'Tipo de servicio no encontrado']);
-                exit();
+                return;
             }
 
-            // Validaciones (las mismas que en guardar)
-            if (empty($_POST['tipo_servicio_nombre'])) {
-                header('Content-Type: application/json; charset=utf-8');
-                echo json_encode(['codigo' => 0, 'mensaje' => 'El nombre del servicio es obligatorio']);
-                exit();
-            }
+            // Sincronizar sin codificar caracteres
+            $tipoServicio->sincronizar([
+                'tipo_servicio_nombre' => trim($_POST['tipo_servicio_nombre']),
+                'tipo_servicio_descripcion' => trim($_POST['tipo_servicio_descripcion'] ?? ''),
+                'tipo_servicio_precio_base' => floatval($_POST['tipo_servicio_precio_base']),
+                'tipo_servicio_tiempo_estimado' => intval($_POST['tipo_servicio_tiempo_estimado']),
+                'tipo_servicio_situacion' => 1
+            ]);
 
-            // Verificar duplicados excluyendo el tipo de servicio actual
-            $nombreExiste = TipoServicio::verificarNombreExistente($_POST['tipo_servicio_nombre'], $tipo_servicio_id);
-            if ($nombreExiste) {
-                header('Content-Type: application/json; charset=utf-8');
-                echo json_encode(['codigo' => 0, 'mensaje' => 'Ya existe otro servicio con este nombre']);
-                exit();
-            }
+            $resultado = $tipoServicio->actualizar();
 
-            // Actualizar campos
-            $tipoServicio->tipo_servicio_nombre = trim($_POST['tipo_servicio_nombre']);
-            $tipoServicio->tipo_servicio_descripcion = trim($_POST['tipo_servicio_descripcion'] ?? '');
-            $tipoServicio->tipo_servicio_precio_base = floatval($_POST['tipo_servicio_precio_base']);
-            $tipoServicio->tipo_servicio_tiempo_estimado = intval($_POST['tipo_servicio_tiempo_estimado']);
-
-            $resultado = $tipoServicio->guardar();
-
-            if ($resultado && $resultado['resultado']) {
-                header('Content-Type: application/json; charset=utf-8');
-                echo json_encode([
-                    'codigo' => 1,
-                    'mensaje' => 'Tipo de servicio actualizado correctamente'
-                ]);
+            if ($resultado['resultado']) {
+                echo json_encode(['codigo' => 1, 'mensaje' => 'Tipo de servicio actualizado correctamente']);
             } else {
-                header('Content-Type: application/json; charset=utf-8');
-                echo json_encode([
-                    'codigo' => 0,
-                    'mensaje' => 'Error al actualizar tipo de servicio'
-                ]);
+                http_response_code(400);
+                echo json_encode(['codigo' => 0, 'mensaje' => 'No se pudo actualizar el tipo de servicio']);
             }
 
         } catch (Exception $e) {
-            header('Content-Type: application/json; charset=utf-8');
-            echo json_encode([
-                'codigo' => 0,
-                'mensaje' => 'Error: ' . $e->getMessage()
-            ]);
+            http_response_code(500);
+            echo json_encode(['codigo' => 0, 'mensaje' => 'Error al modificar', 'detalle' => $e->getMessage()]);
         }
-        exit();
     }
 
-    /**
-     * API para eliminar tipo de servicio
-     */
     public static function eliminarAPI()
     {
-        ob_clean();
-        
-        try {
-            $input = json_decode(file_get_contents('php://input'), true);
-            $tipo_servicio_id = $input['tipo_servicio_id'] ?? $_POST['tipo_servicio_id'] ?? null;
-            
-            if (!$tipo_servicio_id) {
-                header('Content-Type: application/json; charset=utf-8');
-                echo json_encode(['codigo' => 0, 'mensaje' => 'ID inválido']);
-                exit();
-            }
+        $id = $_GET['id'] ?? null;
 
-            // Verificar si el tipo de servicio está siendo usado en órdenes de trabajo
-            $checkUso = "SELECT COUNT(*) as count FROM orden_trabajo WHERE tipo_servicio_id = " . intval($tipo_servicio_id) . " AND orden_situacion = 1";
-            $resultUso = self::fetchArray($checkUso);
-            
-            if ($resultUso[0]['count'] > 0) {
-                header('Content-Type: application/json; charset=utf-8');
-                echo json_encode(['codigo' => 0, 'mensaje' => 'No se puede eliminar: el tipo de servicio está siendo usado en órdenes de trabajo']);
-                exit();
-            }
-
-            // Usar query directa para actualizar solo el estado
-            $query = "UPDATE tipo_servicio SET tipo_servicio_situacion = 0 WHERE tipo_servicio_id = " . intval($tipo_servicio_id);
-            $resultado = self::$db->exec($query);
-
-            if ($resultado !== false) {
-                header('Content-Type: application/json; charset=utf-8');
-                echo json_encode([
-                    'codigo' => 1,
-                    'mensaje' => 'Tipo de servicio eliminado correctamente'
-                ]);
-            } else {
-                header('Content-Type: application/json; charset=utf-8');
-                echo json_encode([
-                    'codigo' => 0,
-                    'mensaje' => 'Error al eliminar tipo de servicio'
-                ]);
-            }
-
-        } catch (Exception $e) {
-            header('Content-Type: application/json; charset=utf-8');
-            echo json_encode([
-                'codigo' => 0,
-                'mensaje' => 'Error: ' . $e->getMessage()
-            ]);
+        if (!$id) {
+            http_response_code(400);
+            echo json_encode(['codigo' => 0, 'mensaje' => 'ID no válido']);
+            return;
         }
-        exit();
+
+        try {
+            $tipoServicio = TipoServicio::find($id);
+            if (!$tipoServicio) {
+                http_response_code(404);
+                echo json_encode(['codigo' => 0, 'mensaje' => 'Tipo de servicio no encontrado']);
+                return;
+            }
+
+            $tipoServicio->sincronizar(['tipo_servicio_situacion' => 0]);
+            $tipoServicio->actualizar();
+
+            echo json_encode(['codigo' => 1, 'mensaje' => 'Tipo de servicio eliminado correctamente']);
+            
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['codigo' => 0, 'mensaje' => 'Error al eliminar', 'detalle' => $e->getMessage()]);
+        }
     }
 }

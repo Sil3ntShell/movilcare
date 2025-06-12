@@ -4,7 +4,10 @@ namespace Model;
 
 class TipoServicio extends ActiveRecord 
 {
+    // Nombre de la tabla en la BD
     public static $tabla = 'tipo_servicio';
+
+    // Columnas que se van a mapear a la BD
     public static $columnasDB = [
         'tipo_servicio_nombre',
         'tipo_servicio_descripcion',
@@ -15,7 +18,7 @@ class TipoServicio extends ActiveRecord
 
     public static $idTabla = 'tipo_servicio_id';
     
-    // Propiedades del modelo
+    // Propiedades
     public $tipo_servicio_id;
     public $tipo_servicio_nombre;
     public $tipo_servicio_descripcion;
@@ -33,132 +36,38 @@ class TipoServicio extends ActiveRecord
         $this->tipo_servicio_situacion = $args['tipo_servicio_situacion'] ?? 1;
     }
 
-    /**
-     * Validaciones antes de guardar
-     */
-    public function validar()
-    {
-        $errores = [];
-
-        if (!$this->tipo_servicio_nombre) {
-            $errores[] = 'El nombre del servicio es obligatorio';
-        }
-
-        if (!$this->tipo_servicio_precio_base || $this->tipo_servicio_precio_base <= 0) {
-            $errores[] = 'El precio base debe ser mayor a 0';
-        }
-
-        if (!$this->tipo_servicio_tiempo_estimado || $this->tipo_servicio_tiempo_estimado <= 0) {
-            $errores[] = 'El tiempo estimado debe ser mayor a 0 minutos';
-        }
-
-        return $errores;
-    }
-
-    /**
-     * Verificar si existe tipo de servicio con el mismo nombre
-     */
     public static function verificarNombreExistente($nombre, $excluirId = null)
     {
-        try {
-            $nombre = self::sanitizarCadena($nombre);
-            $condicion = "tipo_servicio_nombre = '$nombre' AND tipo_servicio_situacion = 1";
+        $nombre = self::sanitizarCadena($nombre);
 
-            if ($excluirId) {
-                $condicion .= " AND tipo_servicio_id != " . intval($excluirId);
-            }
+        $condNombre = "tipo_servicio_nombre = '$nombre' AND tipo_servicio_situacion = 1";
 
-            $sql = "SELECT COUNT(*) as count FROM tipo_servicio WHERE $condicion";
-            $resultado = self::fetchArray($sql);
-            
-            return ($resultado[0]['count'] ?? 0) > 0;
-
-        } catch (\Exception $e) {
-            return false;
+        if ($excluirId) {
+            $condNombre .= " AND tipo_servicio_id != " . intval($excluirId);
         }
-    }
-
-    /**
-     * Obtener tipo de servicio por ID
-     */
-    public static function obtenerPorId($id)
-    {
-        try {
-            $query = "SELECT * FROM " . static::$tabla . " WHERE " . static::$idTabla . " = ?";
-            $resultado = self::fetchFirst($query, [$id]);
-            
-            if ($resultado) {
-                return new static($resultado);
-            }
-            
-            return null;
-            
-        } catch (\Exception $e) {
-            return null;
-        }
-    }
-
-    /**
-     * Obtener tipo de servicio activo por ID
-     */
-    public static function obtenerActivoPorId($id)
-    {
-        try {
-            $query = "SELECT * FROM " . static::$tabla . " WHERE " . static::$idTabla . " = ? AND tipo_servicio_situacion = 1";
-            $resultado = self::fetchFirst($query, [$id]);
-            
-            if ($resultado) {
-                return new static($resultado);
-            }
-            
-            return null;
-            
-        } catch (\Exception $e) {
-            return null;
-        }
-    }
-
-    /**
-     * Buscar el primer registro que coincida con la consulta
-     */
-    public static function fetchFirst($query, $params = [])
-    {
-        try {
-            $db = self::$db;
-            $stmt = $db->prepare($query);
-            $stmt->execute($params);
-            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
-            
-            return $result ?: null;
-            
-        } catch (\Exception $e) {
-            return null;
-        }
-    }
-
-    /**
-     * Convertir tiempo de minutos a formato legible
-     */
-    public function getTiempoFormateado()
-    {
-        $minutos = $this->tipo_servicio_tiempo_estimado;
+        // DEBUG: Agrega esta línea temporalmente
+    error_log("SQL query: SELECT COUNT(*) as count FROM tipo_servicio WHERE $condNombre");
+    
+        $sql = "SELECT COUNT(*) as count FROM tipo_servicio WHERE $condNombre";
+        $resultado = self::fetchArray($sql);
         
-        if ($minutos < 60) {
-            return $minutos . ' minutos';
-        } else if ($minutos < 1440) { // menos de 24 horas
-            $horas = floor($minutos / 60);
-            $mins = $minutos % 60;
-            return $horas . 'h' . ($mins > 0 ? ' ' . $mins . 'm' : '');
-        } else { // días
-            $dias = floor($minutos / 1440);
-            $horasRestantes = floor(($minutos % 1440) / 60);
-            return $dias . ' días' . ($horasRestantes > 0 ? ' ' . $horasRestantes . 'h' : '');
-        }
+        return ($resultado[0]['count'] ?? 0) > 0;
     }
 
-    /**
-     * Sanear cadena de entrada
-     */
+    public static function EliminarTipoServicio($id)
+    {
+        $sql = "UPDATE " . self::$tabla . " SET tipo_servicio_situacion = 0 WHERE " . self::$idTabla . " = " . intval($id);
+        return self::$db->exec($sql);
+    }
+
+    // Obtener todos los tipos de servicio activos para selects
+    public static function obtenerTiposServicioActivos()
+    {
+        $sql = "SELECT tipo_servicio_id, tipo_servicio_nombre FROM tipo_servicio WHERE tipo_servicio_situacion = 1 ORDER BY tipo_servicio_nombre ASC";
+        return self::fetchArray($sql);
+    }
+
+    //Sanear cadena de entrada
     private static function sanitizarCadena($valor)
     {
         return htmlspecialchars(trim($valor), ENT_QUOTES, 'UTF-8');

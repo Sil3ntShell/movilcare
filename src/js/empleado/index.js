@@ -1,3 +1,4 @@
+// empleado/index.js
 import DataTable from "datatables.net-bs5";
 import { validarFormulario } from '../funciones';
 import Swal from "sweetalert2";
@@ -14,71 +15,87 @@ const empleado_dpi = document.getElementById('empleado_dpi');
 let empleadoEditando = null;
 let datatable = null;
 
-// Validar Teléfono
+// Validar Teléfono - Mejorado
 const ValidarTelefono = () => {
-    const numero = empleado_tel.value;
-    if (numero.length === 8) {
-        empleado_tel.classList.add('is-valid');
-        empleado_tel.classList.remove('is-invalid');
-    } else if (numero.length > 0) {
-        empleado_tel.classList.add('is-invalid');
-        empleado_tel.classList.remove('is-valid');
-        Swal.fire({ icon: "error", title: "Teléfono inválido", text: "Debe contener exactamente 8 dígitos" });
-    } else {
+    const numero = empleado_tel.value.trim();
+    
+    if (numero.length < 1) {
         empleado_tel.classList.remove('is-valid', 'is-invalid');
-    }
-};
-
-// Validar DPI
-const ValidarDPI = () => {
-    const numeroDPI = empleado_dpi.value.trim();
-    
-    if (numeroDPI.length === 0) {
-        empleado_dpi.classList.remove('is-valid', 'is-invalid');
-        return;
-    }
-    
-    if (!/^\d+$/.test(numeroDPI)) {
-        empleado_dpi.classList.add('is-invalid');
-        empleado_dpi.classList.remove('is-valid');
-        Swal.fire({ 
-            icon: "error", 
-            title: "DPI inválido", 
-            text: "El DPI debe contener solo números" 
-        });
-        return;
-    }
-    
-    if (numeroDPI.length === 13) {
-        empleado_dpi.classList.add('is-valid');
-        empleado_dpi.classList.remove('is-invalid');
+        return true;
     } else {
-        empleado_dpi.classList.add('is-invalid');
-        empleado_dpi.classList.remove('is-valid');
-        
-        if (numeroDPI.length < 13) {
-            Swal.fire({ 
-                icon: "error", 
-                title: "DPI inválido", 
-                text: `Debe contener exactamente 13 dígitos. Faltan ${13 - numeroDPI.length} dígitos.` 
+        if (numero.length !== 8) {
+            empleado_tel.classList.add('is-invalid');
+            empleado_tel.classList.remove('is-valid');
+            Swal.fire({
+                position: "center",
+                icon: "warning",
+                title: "Teléfono incorrecto",
+                text: "Debe tener exactamente 8 dígitos",
+                showConfirmButton: true,
             });
+            return false;
         } else {
-            Swal.fire({ 
-                icon: "error", 
-                title: "DPI inválido", 
-                text: `Debe contener exactamente 13 dígitos. Sobran ${numeroDPI.length - 13} dígitos.` 
-            });
+            empleado_tel.classList.remove('is-invalid');
+            empleado_tel.classList.add('is-valid');
+            return true;
         }
     }
 };
 
-// Cargar usuarios para el select
+// Validar DPI - Mejorado
+const ValidarDPI = () => {
+    const numeroDPI = empleado_dpi.value.trim();
+    
+    if (numeroDPI.length < 1) {
+        empleado_dpi.classList.remove('is-valid', 'is-invalid');
+        return true;
+    } else {
+        if (!/^\d+$/.test(numeroDPI)) {
+            empleado_dpi.classList.add('is-invalid');
+            empleado_dpi.classList.remove('is-valid');
+            Swal.fire({ 
+                icon: "error", 
+                title: "DPI inválido", 
+                text: "El DPI debe contener solo números" 
+            });
+            return false;
+        }
+        
+        if (numeroDPI.length !== 13) {
+            empleado_dpi.classList.add('is-invalid');
+            empleado_dpi.classList.remove('is-valid');
+            
+            if (numeroDPI.length < 13) {
+                Swal.fire({ 
+                    icon: "error", 
+                    title: "DPI inválido", 
+                    text: `Debe contener exactamente 13 dígitos. Faltan ${13 - numeroDPI.length} dígitos.` 
+                });
+            } else {
+                Swal.fire({ 
+                    icon: "error", 
+                    title: "DPI inválido", 
+                    text: `Debe contener exactamente 13 dígitos. Sobran ${numeroDPI.length - 13} dígitos.` 
+                });
+            }
+            return false;
+        } else {
+            empleado_dpi.classList.remove('is-invalid');
+            empleado_dpi.classList.add('is-valid');
+            return true;
+        }
+    }
+};
+
+// Cargar usuarios para el select - Mejorado
 const cargarUsuarios = async () => {
     try {
         const respuesta = await fetch('/empresa_celulares/usuario/buscarAPI');
         const data = await respuesta.json();
         
         const selectUsuario = document.getElementById('usuario_id');
+        if (!selectUsuario) return;
+        
         selectUsuario.innerHTML = '<option value="">Sin usuario asignado</option>';
         
         if (data.codigo === 1 && data.data) {
@@ -95,149 +112,7 @@ const cargarUsuarios = async () => {
     }
 };
 
-// Guardar Empleado
-const GuardarEmpleado = async (event) => {
-    event.preventDefault();
-    BtnGuardar.disabled = true;
-
-    if (!validarFormulario(FormularioEmpleados, ['empleado_id'])) {
-        Swal.fire({ icon: "info", title: "Formulario incompleto", text: "Debe completar todos los campos requeridos" });
-        BtnGuardar.disabled = false;
-        return;
-    }
-
-    if (empleado_dpi.classList.contains('is-invalid')) {
-        Swal.fire({ icon: "error", title: "DPI inválido", text: "Debe corregir el DPI antes de continuar" });
-        BtnGuardar.disabled = false;
-        return;
-    }
-
-    if (empleado_tel.classList.contains('is-invalid')) {
-        Swal.fire({ icon: "error", title: "Teléfono inválido", text: "Debe corregir el teléfono antes de continuar" });
-        BtnGuardar.disabled = false;
-        return;
-    }
-
-    const body = new FormData(FormularioEmpleados);
-    const url = empleadoEditando ? '/empresa_celulares/empleado/actualizarAPI' : '/empresa_celulares/empleado/guardarAPI';
-    
-    if (empleadoEditando) {
-        body.append('empleado_id', empleadoEditando);
-    }
-
-    try {
-        const respuesta = await fetch(url, { method: 'POST', body });
-        const { codigo, mensaje } = await respuesta.json();
-        if (codigo == 1) {
-            Swal.fire({ icon: "success", title: empleadoEditando ? "Empleado actualizado" : "Empleado registrado", text: mensaje });
-            limpiarTodo();
-            BuscarEmpleados();
-        } else {
-            Swal.fire({ icon: "error", title: "Error", text: mensaje });
-        }
-    } catch (error) {
-        console.error(error);
-        Swal.fire({ icon: "error", title: "Error", text: "Error de conexión" });
-    }
-    BtnGuardar.disabled = false;
-};
-
-// Buscar Empleados
-const BuscarEmpleados = async () => {
-    try {
-        const res = await fetch('/empresa_celulares/empleado/buscarAPI');
-        const { codigo, mensaje, data } = await res.json();
-        if (codigo == 1) {
-            datatable.clear().draw();
-            datatable.rows.add(data).draw();
-        } else {
-            Swal.fire({ icon: "info", title: "Error", text: mensaje });
-        }
-    } catch (error) {
-        console.error(error);
-    }
-};
-
-// DataTable Configuración
-datatable = new DataTable('#TablaEmpleados', {
-    language: lenguaje,
-    data: [],
-    columns: [
-        { title: "ID", data: "empleado_id", render: (data, type, row, meta) => meta.row + 1 },
-        {
-            title: "Foto",
-            data: "usuario_fotografia",
-            render: (data, type, row) => {
-                if (data) {
-                    return `<img src="/empresa_celulares/storage/fotos_usuarios/${data}" 
-                           style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" 
-                           onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiM2Yzc1N2QiLz4KPGNpcmNsZSBjeD0iMjAiIGN5PSIxNiIgcj0iNCIgZmlsbD0iI2ZmZmZmZiIvPgo8cGF0aCBkPSJNMjggMjhBOCA4IDAgMCAwIDEyIDI4IiBmaWxsPSIjZmZmZmZmIi8+Cjwvc3ZnPg==';"/>`;
-                } else {
-                    return `<span class="badge bg-secondary rounded-circle" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 8px;">Sin foto</span>`;
-                }
-            },
-            orderable: false,
-            className: 'text-center'
-        },
-        { 
-            title: "Nombre Completo", 
-            data: null, 
-            render: (data, type, row) => `${row.empleado_nom1} ${row.empleado_nom2 || ''} ${row.empleado_ape1} ${row.empleado_ape2 || ''}`.trim()
-        },
-        { title: "DPI", data: "empleado_dpi" },
-        { title: "Teléfono", data: "empleado_tel" },
-        { title: "Correo", data: "empleado_correo" },
-        { title: "Especialidad", data: "empleado_especialidad" },
-        { 
-            title: "Salario", 
-            data: "empleado_salario",
-            render: (data) => `Q. ${parseFloat(data).toLocaleString('es-GT', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`
-        },
-        { 
-            title: "Fecha Contratación", 
-            data: "empleado_fecha_contratacion",
-            render: (data) => data ? new Date(data).toLocaleDateString('es-GT') : 'N/A'
-        },
-        {
-            title: "Acciones", 
-            data: "empleado_id",
-            render: (id, t, row) => `
-                <div class="d-flex justify-content-center gap-1">
-                    <button class="btn btn-warning btn-sm modificar" data-id="${id}" data-json='${JSON.stringify(row)}'>✏️</button>
-                    <button class="btn btn-danger btn-sm eliminar" data-id="${id}">🗑️</button>
-                </div>
-            `,
-            orderable: false,
-            className: 'text-center'
-        }
-    ]
-});
-
-// Llenar formulario para editar
-const llenarFormulario = (e) => {
-    const datos = JSON.parse(e.currentTarget.dataset.json);
-    
-    document.getElementById('empleado_nom1').value = datos.empleado_nom1;
-    document.getElementById('empleado_nom2').value = datos.empleado_nom2 || '';
-    document.getElementById('empleado_ape1').value = datos.empleado_ape1;
-    document.getElementById('empleado_ape2').value = datos.empleado_ape2 || '';
-    document.getElementById('empleado_tel').value = datos.empleado_tel;
-    document.getElementById('empleado_dpi').value = datos.empleado_dpi;
-    document.getElementById('empleado_correo').value = datos.empleado_correo;
-    document.getElementById('empleado_especialidad').value = datos.empleado_especialidad;
-    document.getElementById('empleado_salario').value = datos.empleado_salario;
-    document.getElementById('usuario_id').value = datos.usuario_id || '';
-
-    empleadoEditando = datos.empleado_id;
-    BtnGuardar.textContent = 'Actualizar Empleado';
-    BtnGuardar.className = 'btn btn-warning px-4';
-    BtnGuardar.classList.remove('d-none');
-    BtnModificar.classList.add('d-none');
-    
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-};
-
-// Limpiar todo
+// Limpiar formulario - Mejorado
 const limpiarTodo = () => {
     FormularioEmpleados.reset();
     empleadoEditando = null;
@@ -246,53 +121,350 @@ const limpiarTodo = () => {
     BtnGuardar.classList.remove('d-none');
     BtnModificar.classList.add('d-none');
     
-    FormularioEmpleados.querySelectorAll('.is-valid, .is-invalid').forEach(el => {
-        el.classList.remove('is-valid', 'is-invalid');
+    FormularioEmpleados.querySelectorAll('.form-control, .form-select').forEach(element => {
+        element.classList.remove('is-valid', 'is-invalid');
+        element.title = '';
     });
 };
 
-// Eliminar empleado
+// Guardar/Modificar Empleado - Mejorado
+const GuardarEmpleado = async (event) => {
+    event.preventDefault();
+    BtnGuardar.disabled = true;
+
+    // Validar formulario y campos específicos
+    const telefonoValido = ValidarTelefono();
+    const dpiValido = ValidarDPI();
+
+    if (!validarFormulario(FormularioEmpleados, ['empleado_id']) || !telefonoValido || !dpiValido) {
+        Swal.fire({
+            position: "center",
+            icon: "info",
+            title: "FORMULARIO INCOMPLETO",
+            text: "Verifique todos los campos",
+            showConfirmButton: true,
+        });
+        BtnGuardar.disabled = false;
+        return;
+    }
+
+    const body = new FormData(FormularioEmpleados);
+    let url = '/empresa_celulares/empleado/guardarAPI';
+    
+    if (empleadoEditando) {
+        url = '/empresa_celulares/empleado/modificarAPI';
+        body.append('empleado_id', empleadoEditando);
+    }
+
+    const config = {
+        method: 'POST',
+        body
+    };
+
+    try {
+        const respuesta = await fetch(url, config);
+        const datos = await respuesta.json();
+        const { codigo, mensaje } = datos;
+
+        if (codigo == 1) {
+            await Swal.fire({
+                position: "center",
+                icon: "success",
+                title: "¡Éxito!",
+                text: mensaje,
+                showConfirmButton: true,
+            });
+
+            limpiarTodo();
+            await BuscarEmpleados();
+
+        } else {
+            await Swal.fire({
+                position: "center",
+                icon: "info",
+                title: "Error",
+                text: mensaje,
+                showConfirmButton: true,
+            });
+        }
+
+    } catch (error) {
+        console.log(error);
+        await Swal.fire({
+            position: "center",
+            icon: "error",
+            title: "Error de conexión",
+            text: "No se pudo completar la operación",
+            showConfirmButton: true,
+        });
+    }
+    BtnGuardar.disabled = false;
+};
+
+// Buscar Empleados - Mejorado
+const BuscarEmpleados = async () => {
+    const url = '/empresa_celulares/empleado/buscarAPI';
+    const config = {
+        method: 'GET'
+    };
+
+    try {
+        const respuesta = await fetch(url, config);
+        const datos = await respuesta.json();
+        const { codigo, mensaje, data } = datos;
+
+        if (codigo == 1) {
+            await Swal.fire({
+                position: "center",
+                icon: "success",
+                title: "¡Empleados cargados!",
+                text: `Se cargaron ${data.length} empleado(s) correctamente`,
+                showConfirmButton: true,
+                timer: 2000
+            });
+
+            datatable.clear().draw();
+            datatable.rows.add(data).draw();
+        } else {
+            await Swal.fire({
+                position: "center",
+                icon: "info",
+                title: "Sin datos",
+                text: mensaje,
+                showConfirmButton: true,
+            });
+        }
+
+    } catch (error) {
+        console.log('Error en BuscarEmpleados:', error);
+        await Swal.fire({
+            position: "center",
+            icon: "error",
+            title: "Error de conexión",
+            text: "No se pudieron cargar los empleados",
+            showConfirmButton: true,
+        });
+    }
+};
+
+// Llenar formulario para editar - Mejorado
+const llenarFormulario = (e) => {
+    try {
+        const datos = JSON.parse(e.currentTarget.dataset.json);
+        
+        document.getElementById('empleado_nom1').value = datos.empleado_nom1 || '';
+        document.getElementById('empleado_nom2').value = datos.empleado_nom2 || '';
+        document.getElementById('empleado_ape1').value = datos.empleado_ape1 || '';
+        document.getElementById('empleado_ape2').value = datos.empleado_ape2 || '';
+        document.getElementById('empleado_tel').value = datos.empleado_tel || '';
+        document.getElementById('empleado_dpi').value = datos.empleado_dpi || '';
+        document.getElementById('empleado_correo').value = datos.empleado_correo || '';
+        document.getElementById('empleado_especialidad').value = datos.empleado_especialidad || '';
+        document.getElementById('empleado_salario').value = datos.empleado_salario || '';
+        document.getElementById('usuario_id').value = datos.usuario_id || '';
+
+        empleadoEditando = datos.empleado_id;
+        BtnGuardar.textContent = 'Actualizar Empleado';
+        BtnGuardar.className = 'btn btn-warning px-4';
+        BtnGuardar.classList.remove('d-none');
+        BtnModificar.classList.add('d-none');
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (error) {
+        console.error('Error parsing JSON:', error);
+        Swal.fire({ icon: "error", title: "Error", text: "Error al cargar los datos del empleado" });
+    }
+};
+
+// Eliminar empleado - Mejorado
 const EliminarEmpleado = async (e) => {
-    const id = e.currentTarget.dataset.id;
-    const confirmar = await Swal.fire({
-        icon: "warning", 
-        title: "¿Eliminar empleado?", 
-        text: "Esta acción desactivará el empleado.",
-        showCancelButton: true, 
-        confirmButtonText: "Sí, eliminar", 
-        cancelButtonText: "Cancelar",
+    const idEmpleado = e.currentTarget.dataset.id;
+
+    const AlertaConfirmarEliminar = await Swal.fire({
+        position: "center",
+        icon: "question",
+        title: "¿Desea ejecutar esta acción?",
+        text: 'Está completamente seguro que desea eliminar este empleado',
+        showConfirmButton: true,
+        confirmButtonText: 'Sí, Eliminar',
+        confirmButtonColor: '#d33',
+        cancelButtonText: 'No, Cancelar',
+        showCancelButton: true
     });
 
-    if (confirmar.isConfirmed) {
+    if (AlertaConfirmarEliminar.isConfirmed) {
+        const url = `/empresa_celulares/empleado/eliminar?id=${idEmpleado}`;
+        const config = {
+            method: 'GET'
+        };
+
         try {
-            const res = await fetch('/empresa_celulares/empleado/eliminarAPI', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ empleado_id: id })
-            });
-            const { codigo, mensaje } = await res.json();
+            const consulta = await fetch(url, config);
+            const respuesta = await consulta.json();
+            const { codigo, mensaje } = respuesta;
+
             if (codigo == 1) {
-                Swal.fire({ icon: "success", title: "Eliminado", text: mensaje });
-                BuscarEmpleados();
+                await Swal.fire({
+                    position: "center",
+                    icon: "success",
+                    title: "¡Éxito!",
+                    text: mensaje,
+                    showConfirmButton: true,
+                });
+                
+                await BuscarEmpleados();
             } else {
-                Swal.fire({ icon: "error", title: "Error", text: mensaje });
+                await Swal.fire({
+                    position: "center",
+                    icon: "error",
+                    title: "Error",
+                    text: mensaje,
+                    showConfirmButton: true,
+                });
             }
+
         } catch (error) {
-            console.error(error);
+            console.log(error);
+            await Swal.fire({
+                position: "center",
+                icon: "error",
+                title: "Error de conexión",
+                text: "No se pudo completar la eliminación",
+                showConfirmButton: true,
+            });
         }
     }
 };
 
+// Configurar DataTable - Mejorado
+datatable = new DataTable('#TablaEmpleados', {
+    dom: `
+        <"row mt-3 justify-content-between" 
+            <"col" l> 
+            <"col" B> 
+            <"col-3" f>
+        >
+        t
+        <"row mt-3 justify-content-between" 
+            <"col-md-3 d-flex align-items-center" i> 
+            <"col-md-8 d-flex justify-content-end" p>
+        >
+    `,
+    language: lenguaje,
+    data: [],
+    columns: [
+        { 
+            title: "No.", 
+            data: null,
+            render: (data, type, row, meta) => meta.row + 1,
+            width: '5%'
+        },
+        {
+            title: "Foto",
+            data: "usuario_fotografia",
+            render: (data, type, row) => {
+                if (data && data.trim() !== '') {
+                    const imageUrl = `/empresa_celulares/storage/fotos_usuarios/${data}`;
+                    return `<img src="${imageUrl}" alt="Foto de empleado" style="height: 50px; width: 50px; border-radius: 50%; object-fit: cover;" 
+                            onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjUiIGN5PSIyNSIgcj0iMjUiIGZpbGw9IiM2Yzc1N2QiLz4KPGNpcmNsZSBjeD0iMjUiIGN5PSIyMCIgcj0iNSIgZmlsbD0iI2ZmZmZmZiIvPgo8cGF0aCBkPSJNMzUgMzVBMTAgMTAgMCAwIDAgMTUgMzUiIGZpbGw9IiNmZmZmZmYiLz4KPC9zdmc+Cg==';">`;
+                } else {
+                    return `<i class="bi bi-person-fill text-muted" style="font-size: 30px;"></i>`;
+                }
+            },
+            orderable: false,
+            searchable: false,
+            className: 'text-center',
+            width: '8%'
+        },
+        { 
+            title: "Nombre Completo", 
+            data: null, 
+            render: (data, type, row) => {
+                const nom1 = row.empleado_nom1 || '';
+                const nom2 = row.empleado_nom2 || '';
+                const ape1 = row.empleado_ape1 || '';
+                const ape2 = row.empleado_ape2 || '';
+                return `${nom1} ${nom2} ${ape1} ${ape2}`.trim();
+            },
+            width: '15%'
+        },
+        { 
+            title: "DPI", 
+            data: "empleado_dpi",
+            width: '10%'
+        },
+        { 
+            title: "Teléfono", 
+            data: "empleado_tel",
+            width: '8%'
+        },
+        { 
+            title: "Correo", 
+            data: "empleado_correo",
+            width: '15%'
+        },
+        { 
+            title: "Especialidad", 
+            data: "empleado_especialidad",
+            width: '12%'
+        },
+        { 
+            title: "Salario", 
+            data: "empleado_salario",
+            render: (data) => `Q. ${parseFloat(data || 0).toLocaleString('es-GT', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`,
+            className: 'text-end',
+            width: '10%'
+        },
+        { 
+            title: "Fecha Contratación", 
+            data: "empleado_fecha_contratacion",
+            render: (data) => data ? new Date(data).toLocaleDateString('es-GT') : 'N/A',
+            className: 'text-center',
+            width: '10%'
+        },
+        {
+            title: "Acciones", 
+            data: "empleado_id",
+            render: (id, type, row) => `
+                <div class='d-flex justify-content-center'>
+                    <button class='btn btn-warning modificar mx-1' 
+                        data-id="${id}" 
+                        data-json='${JSON.stringify(row)}'
+                        title="Modificar">   
+                        <i class='bi bi-pencil-square me-1'></i> Modificar
+                    </button>
+                    <button class='btn btn-danger eliminar mx-1' 
+                        data-id="${id}"
+                        title="Eliminar">
+                       <i class="bi bi-trash3 me-1"></i>Eliminar
+                    </button>
+                </div>
+            `,
+            orderable: false,
+            searchable: false,
+            className: 'text-center',
+            width: '12%'
+        }
+    ]
+});
+
 // Event Listeners
 document.addEventListener('DOMContentLoaded', () => {
+    // Cargar datos iniciales
     cargarUsuarios();
     BuscarEmpleados();
     
+    // Validaciones en tiempo real
     if (empleado_tel) empleado_tel.addEventListener('change', ValidarTelefono);
     if (empleado_dpi) empleado_dpi.addEventListener('change', ValidarDPI);
+    
+    // Eventos de formulario
     if (FormularioEmpleados) FormularioEmpleados.addEventListener('submit', GuardarEmpleado);
     if (BtnLimpiar) BtnLimpiar.addEventListener('click', limpiarTodo);
     
+    // Eventos de DataTable
     datatable.on('click', '.modificar', llenarFormulario);
     datatable.on('click', '.eliminar', EliminarEmpleado);
+    
+    console.log('Aplicación de empleados inicializada correctamente');
 });

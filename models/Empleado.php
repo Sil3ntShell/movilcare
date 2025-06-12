@@ -91,7 +91,7 @@ class Empleado extends ActiveRecord
     }
 
     /**
-     * Verificar si existe empleado con correo o DPI
+     * Verificar si existe empleado con correo o DPI - CORREGIDO
      */
     public static function verificarEmpleadoExistente($correo, $dpi, $excluirId = null)
     {
@@ -114,33 +114,57 @@ class Empleado extends ActiveRecord
             ";
 
             $resultado = self::fetchArray($sql);
-            return $resultado[0] ?? ['correo_existe' => 0, 'dpi_existe' => 0];
+            
+            // ASEGURAR que siempre retorne la estructura correcta
+            if (!empty($resultado) && isset($resultado[0])) {
+                return [
+                    'correo_existe' => intval($resultado[0]['correo_existe']),
+                    'dpi_existe' => intval($resultado[0]['dpi_existe'])
+                ];
+            } else {
+                return ['correo_existe' => 0, 'dpi_existe' => 0];
+            }
 
         } catch (\Exception $e) {
-            return ['correo_existe' => false, 'dpi_existe' => false];
+            error_log("Error en verificarEmpleadoExistente: " . $e->getMessage());
+            // Fallback seguro en caso de error
+            return ['correo_existe' => 0, 'dpi_existe' => 0];
         }
     }
 
     /**
-     * Buscar el primer registro que coincida con la consulta
+     * Obtener empleados con información de usuario - NUEVO
      */
-    public static function fetchFirst($query, $params = [])
+    public static function obtenerEmpleadosConUsuario()
     {
-        try {
-            $db = self::$db;
-            $stmt = $db->prepare($query);
-            $stmt->execute($params);
-            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
-            
-            return $result ?: null;
-            
-        } catch (\Exception $e) {
-            return null;
-        }
+        $sql = "SELECT 
+                    e.empleado_id,
+                    e.usuario_id,
+                    e.empleado_nom1,
+                    e.empleado_nom2,
+                    e.empleado_ape1,
+                    e.empleado_ape2,
+                    e.empleado_dpi,
+                    e.empleado_tel,
+                    e.empleado_correo,
+                    e.empleado_especialidad,
+                    e.empleado_fecha_contratacion,
+                    e.empleado_salario,
+                    e.empleado_situacion,
+                    u.usuario_fotografia,
+                    u.rol_id,
+                    r.rol_nombre
+                FROM empleado e
+                LEFT JOIN usuario u ON e.usuario_id = u.usuario_id
+                LEFT JOIN rol r ON u.rol_id = r.rol_id
+                WHERE e.empleado_situacion = 1
+                ORDER BY e.empleado_fecha_contratacion DESC, e.empleado_id DESC";
+        
+        return self::fetchArray($sql);
     }
 
     /**
-     * Obtener empleado por ID
+     * Obtener empleado por ID - MEJORADO
      */
     public static function obtenerPorId($id)
     {
@@ -155,6 +179,7 @@ class Empleado extends ActiveRecord
             return null;
             
         } catch (\Exception $e) {
+            error_log("Error en obtenerPorId: " . $e->getMessage());
             return null;
         }
     }
@@ -175,8 +200,52 @@ class Empleado extends ActiveRecord
             return null;
             
         } catch (\Exception $e) {
+            error_log("Error en obtenerEmpleadoActivo: " . $e->getMessage());
             return null;
         }
+    }
+
+    /**
+     * Buscar el primer registro que coincida con la consulta - MEJORADO
+     */
+    public static function fetchFirst($query, $params = [])
+    {
+        try {
+            $db = self::$db;
+            $stmt = $db->prepare($query);
+            $stmt->execute($params);
+            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+            
+            return $result ?: null;
+            
+        } catch (\Exception $e) {
+            error_log("Error en fetchFirst: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Obtener empleados activos para selects
+     */
+    public static function obtenerEmpleadosActivos()
+    {
+        $sql = "SELECT 
+                empleado_id,
+                CONCAT(empleado_nom1, ' ', empleado_ape1) AS empleado_nombre_completo
+                FROM empleado
+                WHERE empleado_situacion = 1
+                ORDER BY empleado_nom1 ASC";
+        
+        return self::fetchArray($sql);
+    }
+
+    /**
+     * Eliminar empleado (cambiar situación) - NUEVO
+     */
+    public static function EliminarEmpleado($id)
+    {
+        $sql = "UPDATE " . self::$tabla . " SET empleado_situacion = 0 WHERE " . self::$idTabla . " = " . intval($id);
+        return self::$db->exec($sql);
     }
 
     /**

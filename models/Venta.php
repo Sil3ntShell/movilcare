@@ -8,6 +8,7 @@ class Venta extends ActiveRecord
     public static $columnasDB = [
         'cliente_id',
         'usuario_id',
+        // Quitar venta_fecha porque usa DEFAULT CURRENT YEAR TO SECOND
         'venta_subtotal',
         'venta_descuento',
         'venta_impuestos',
@@ -39,6 +40,7 @@ class Venta extends ActiveRecord
         $this->venta_id = $args['venta_id'] ?? null;
         $this->cliente_id = $args['cliente_id'] ?? null;
         $this->usuario_id = $args['usuario_id'] ?? null;
+        // Para Informix, usar fecha actual o NULL para que use DEFAULT CURRENT
         $this->venta_fecha = $args['venta_fecha'] ?? null;
         $this->venta_subtotal = $args['venta_subtotal'] ?? 0;
         $this->venta_descuento = $args['venta_descuento'] ?? 0;
@@ -85,35 +87,17 @@ class Venta extends ActiveRecord
     // Obtener detalle de la venta
     public function obtenerDetalle()
     {
-        $sql = "
-            SELECT 
-                dv.*,
-                CASE 
-                    WHEN dv.inventario_id IS NOT NULL THEN i.inventario_descripcion
-                    WHEN dv.orden_id IS NOT NULL THEN ot.orden_diagnostico
-                    ELSE dv.detalle_descripcion
-                END as item_descripcion,
-                CASE 
-                    WHEN dv.inventario_id IS NOT NULL THEN 'PRODUCTO'
-                    WHEN dv.orden_id IS NOT NULL THEN 'SERVICIO'
-                    ELSE 'OTRO'
-                END as tipo_real
-            FROM detalle_venta dv
-            LEFT JOIN inventario i ON dv.inventario_id = i.inventario_id
-            LEFT JOIN orden_trabajo ot ON dv.orden_id = ot.orden_id
-            WHERE dv.venta_id = {$this->venta_id} AND dv.detalle_situacion = 1
-            ORDER BY dv.detalle_id ASC
-        ";
+        $sql = "SELECT * FROM detalle_venta WHERE venta_id = {$this->venta_id} AND detalle_situacion = 1 ORDER BY detalle_id ASC";
         return self::fetchArray($sql);
     }
 
-    // Generar número de venta
+    // Generar número de venta compatible con Informix
     public function generarNumeroVenta()
     {
         $año = date('Y');
         $mes = date('m');
         
-        // Buscar el último número de venta del mes
+        // Buscar el último número de venta del mes usando funciones de Informix
         $query = "SELECT COUNT(*) as count FROM venta WHERE YEAR(venta_fecha) = $año AND MONTH(venta_fecha) = $mes";
         $resultado = self::fetchArray($query);
         $numero = ($resultado[0]['count'] ?? 0) + 1;

@@ -1,4 +1,5 @@
 import Swal from 'sweetalert2';
+
 export const validarFormulario = (formulario, excepciones = [] ) => {
     const elements = formulario.querySelectorAll("input, select, textarea");
     let validarFormulario = []

@@ -1,7 +1,9 @@
-import DataTable from "datatables.net-bs5";
-import { validarFormulario } from '../funciones';
+// tiposervicio/index.js
 import Swal from "sweetalert2";
+import DataTable from "datatables.net-bs5";
+import { validarFormulario } from "../funciones";
 import { lenguaje } from "../lenguaje";
+
 
 // Elementos del DOM
 const FormularioTipoServicio = document.getElementById('FormularioTipoServicio');
@@ -9,8 +11,15 @@ const BtnGuardar = document.getElementById('BtnGuardar');
 const BtnModificar = document.getElementById('BtnModificar');
 const BtnLimpiar = document.getElementById('BtnLimpiar');
 
-let tipoServicioEditando = null;
-let datatable = null;
+// Función para limpiar formulario
+const limpiarTodo = () => {
+    FormularioTipoServicio.reset();
+    BtnGuardar.classList.remove('d-none');
+    BtnModificar.classList.add('d-none');
+    FormularioTipoServicio.querySelectorAll('.is-valid, .is-invalid').forEach(el => {
+        el.classList.remove('is-valid', 'is-invalid');
+    });
+};
 
 // Guardar Tipo de Servicio
 const GuardarTipoServicio = async (event) => {
@@ -24,34 +33,32 @@ const GuardarTipoServicio = async (event) => {
     }
 
     const body = new FormData(FormularioTipoServicio);
-    const url = tipoServicioEditando ? '/empresa_celulares/tiposervicio/actualizarAPI' : '/empresa_celulares/tiposervicio/guardarAPI';
-    
-    if (tipoServicioEditando) {
-        body.append('tipo_servicio_id', tipoServicioEditando);
-    }
+    const url = '/empresa_celulares/tiposervicio/guardarAPI';
 
     try {
         const respuesta = await fetch(url, { method: 'POST', body });
         const { codigo, mensaje } = await respuesta.json();
+        
         if (codigo == 1) {
-            Swal.fire({ icon: "success", title: tipoServicioEditando ? "Servicio actualizado" : "Servicio registrado", text: mensaje });
+            Swal.fire({ icon: "success", title: "Tipo de servicio registrado", text: mensaje });
             limpiarTodo();
             BuscarTiposServicio();
         } else {
-            Swal.fire({ icon: "error", title: "Error", text: mensaje });
+            Swal.fire({ icon: "info", title: "Error", text: mensaje });
         }
     } catch (error) {
         console.error(error);
-        Swal.fire({ icon: "error", title: "Error", text: "Error de conexión" });
     }
     BtnGuardar.disabled = false;
 };
 
 // Buscar Tipos de Servicio
 const BuscarTiposServicio = async () => {
+    const url = '/empresa_celulares/tiposervicio/buscarAPI';
     try {
-        const res = await fetch('/empresa_celulares/tiposervicio/buscarAPI');
+        const res = await fetch(url);
         const { codigo, mensaje, data } = await res.json();
+        
         if (codigo == 1) {
             datatable.clear().draw();
             datatable.rows.add(data).draw();
@@ -64,18 +71,23 @@ const BuscarTiposServicio = async () => {
 };
 
 // DataTable Configuración
-datatable = new DataTable('#TablaTipoServicio', {
+const datatable = new DataTable('#TablaTipoServicio', {
     language: lenguaje,
     data: [],
     columns: [
         { title: "ID", data: "tipo_servicio_id", render: (data, type, row, meta) => meta.row + 1 },
-        { title: "Nombre del Servicio", data: "tipo_servicio_nombre" },
+        { 
+            title: "Nombre del Servicio", 
+            data: "tipo_servicio_nombre",
+            render: (data) => decodificarTexto(data)
+        },
         { 
             title: "Descripción", 
             data: "tipo_servicio_descripcion",
             render: (data) => {
                 if (!data || data.trim() === '') return 'Sin descripción';
-                return data.length > 50 ? data.substring(0, 50) + '...' : data;
+                const textoDecodificado = decodificarTexto(data);
+                return textoDecodificado.length > 50 ? textoDecodificado.substring(0, 50) + '...' : textoDecodificado;
             }
         },
         { 
@@ -106,70 +118,89 @@ datatable = new DataTable('#TablaTipoServicio', {
         {
             title: "Acciones", 
             data: "tipo_servicio_id",
-            render: (id, t, row) => `
+            render: (id, type, row) => `
                 <div class="d-flex justify-content-center gap-1">
                     <button class="btn btn-warning btn-sm modificar" data-id="${id}" data-json='${JSON.stringify(row)}'>✏️</button>
                     <button class="btn btn-danger btn-sm eliminar" data-id="${id}">🗑️</button>
                 </div>
-            `,
-            orderable: false,
-            className: 'text-center'
+            `
         }
     ]
 });
 
-// Llenar formulario para editar
+// Función para decodificar caracteres especiales
+const decodificarTexto = (texto) => {
+    if (!texto) return texto;
+    const textArea = document.createElement('textarea');
+    textArea.innerHTML = texto;
+    return textArea.value;
+};
+
+// Llenar formulario para editar (decodificando caracteres especiales)
 const llenarFormulario = (e) => {
     const datos = JSON.parse(e.currentTarget.dataset.json);
-    
-    document.getElementById('tipo_servicio_nombre').value = datos.tipo_servicio_nombre;
-    document.getElementById('tipo_servicio_descripcion').value = datos.tipo_servicio_descripcion || '';
-    document.getElementById('tipo_servicio_precio_base').value = datos.tipo_servicio_precio_base;
-    document.getElementById('tipo_servicio_tiempo_estimado').value = datos.tipo_servicio_tiempo_estimado;
-
-    tipoServicioEditando = datos.tipo_servicio_id;
-    BtnGuardar.textContent = 'Actualizar Servicio';
-    BtnGuardar.className = 'btn btn-warning px-4';
-    BtnGuardar.classList.remove('d-none');
-    BtnModificar.classList.add('d-none');
-    
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    for (let key in datos) {
+        const input = document.getElementById(key);
+        if (input) {
+            // Decodificar el valor antes de asignarlo
+            input.value = decodificarTexto(datos[key]);
+        }
+    }
+    BtnGuardar.classList.add('d-none');
+    BtnModificar.classList.remove('d-none');
+    window.scrollTo({ top: 0 });
 };
 
-// Limpiar todo
-const limpiarTodo = () => {
-    FormularioTipoServicio.reset();
-    tipoServicioEditando = null;
-    BtnGuardar.textContent = 'Guardar';
-    BtnGuardar.className = 'btn btn-success px-4';
-    BtnGuardar.classList.remove('d-none');
-    BtnModificar.classList.add('d-none');
-    
-    FormularioTipoServicio.querySelectorAll('.is-valid, .is-invalid').forEach(el => {
-        el.classList.remove('is-valid', 'is-invalid');
-    });
+// Modificar Tipo de Servicio
+const ModificarTipoServicio = async (event) => {
+    event.preventDefault();
+    BtnModificar.disabled = true;
+
+    if (!validarFormulario(FormularioTipoServicio)) {
+        Swal.fire({ icon: "info", title: "Formulario incompleto", text: "Complete todos los campos" });
+        BtnModificar.disabled = false;
+        return;
+    }
+
+    const body = new FormData(FormularioTipoServicio);
+    const url = '/empresa_celulares/tiposervicio/modificarAPI';
+
+    try {
+        const respuesta = await fetch(url, { method: 'POST', body });
+        const { codigo, mensaje } = await respuesta.json();
+        
+        if (codigo == 1) {
+            Swal.fire({ icon: "success", title: "Tipo de servicio modificado", text: mensaje });
+            limpiarTodo();
+            BuscarTiposServicio();
+        } else {
+            Swal.fire({ icon: "error", title: "Error", text: mensaje });
+        }
+    } catch (error) {
+        console.error(error);
+        Swal.fire({ icon: "error", title: "Error", text: "Error de conexión" });
+    }
+    BtnModificar.disabled = false;
 };
 
-// Eliminar tipo de servicio
+// Eliminar Tipo de Servicio
 const EliminarTipoServicio = async (e) => {
     const id = e.currentTarget.dataset.id;
     const confirmar = await Swal.fire({
         icon: "warning", 
         title: "¿Eliminar tipo de servicio?", 
-        text: "Esta acción desactivará el tipo de servicio.",
+        text: "Esta acción no se puede deshacer.",
         showCancelButton: true, 
         confirmButtonText: "Sí, eliminar", 
         cancelButtonText: "Cancelar",
     });
 
     if (confirmar.isConfirmed) {
+        const url = `/empresa_celulares/tiposervicio/eliminar?id=${id}`;
         try {
-            const res = await fetch('/empresa_celulares/tiposervicio/eliminarAPI', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ tipo_servicio_id: id })
-            });
+            const res = await fetch(url);
             const { codigo, mensaje } = await res.json();
+            
             if (codigo == 1) {
                 Swal.fire({ icon: "success", title: "Eliminado", text: mensaje });
                 BuscarTiposServicio();
@@ -182,51 +213,12 @@ const EliminarTipoServicio = async (e) => {
     }
 };
 
-// Llenar formulario con ejemplos
-const cargarEjemplo = (e) => {
-    const btn = e.currentTarget;
-    const nombre = btn.dataset.nombre;
-    const precio = btn.dataset.precio;
-    const tiempo = btn.dataset.tiempo;
-    
-    document.getElementById('tipo_servicio_nombre').value = nombre;
-    document.getElementById('tipo_servicio_precio_base').value = precio;
-    document.getElementById('tipo_servicio_tiempo_estimado').value = tiempo;
-    
-    // Descripción automática según el servicio
-    const descripciones = {
-        'Cambio de Pantalla': 'Reemplazo completo de pantalla LCD/OLED incluyendo touch y marco. Incluye limpieza interna y calibración.',
-        'Cambio de Batería': 'Reemplazo de batería original. Incluye pruebas de carga y calibración del sistema.',
-        'Reparación de Placa': 'Diagnóstico y reparación a nivel de componentes. Incluye soldadura, reballing y pruebas.',
-        'Liberación de Equipo': 'Liberación por software para todas las compañías. Incluye respaldo de datos.',
-        'Diagnóstico General': 'Evaluación completa del equipo para identificar fallas. Incluye reporte detallado.'
-    };
-    
-    if (descripciones[nombre]) {
-        document.getElementById('tipo_servicio_descripcion').value = descripciones[nombre];
-    }
-    
-    // Efecto visual
-    btn.classList.add('btn-info');
-    btn.classList.remove('btn-outline-info');
-    setTimeout(() => {
-        btn.classList.remove('btn-info');
-        btn.classList.add('btn-outline-info');
-    }, 300);
-};
-
-// Event Listeners
+// Event listeners
 document.addEventListener('DOMContentLoaded', () => {
     BuscarTiposServicio();
-    
-    if (FormularioTipoServicio) FormularioTipoServicio.addEventListener('submit', GuardarTipoServicio);
-    if (BtnLimpiar) BtnLimpiar.addEventListener('click', limpiarTodo);
-    
-    // Event listeners para ejemplos
-    document.querySelectorAll('.ejemplo-servicio').forEach(btn => {
-        btn.addEventListener('click', cargarEjemplo);
-    });
-    
+    FormularioTipoServicio.addEventListener('submit', GuardarTipoServicio);
+    BtnModificar.addEventListener('click', ModificarTipoServicio);
+    BtnLimpiar.addEventListener('click', limpiarTodo);
     datatable.on('click', '.modificar', llenarFormulario);
     datatable.on('click', '.eliminar', EliminarTipoServicio);
 });
