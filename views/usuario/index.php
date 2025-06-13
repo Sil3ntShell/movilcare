@@ -50,12 +50,6 @@
           <input type="email" class="form-control" id="usuario_correo" name="usuario_correo" required placeholder="ejemplo@correo.com">
         </div>
       </div>
-      <div class="col-md-4">
-        <label for="rol_id" class="form-label">Rol <span class="text-danger">*</span></label>
-        <select class="form-select" id="rol_id" name="rol_id" required>
-          <option value="">Seleccione un rol</option>
-        </select>
-      </div>
     </div>
 
     <!-- DIRECCIÓN -->

@@ -15,13 +15,13 @@ class EmpleadoController extends ActiveRecord
     }
 
     /**
-     * API para buscar empleados - MEJORADO
+     * API para buscar empleados
      */
     public static function buscarAPI()
     {
         try {
-            // Usar el método del modelo que incluye toda la información necesaria
-            $empleados = Empleado::obtenerEmpleadosConUsuario();
+            // Consulta simple solo de la tabla empleado
+            $empleados = self::fetchArray("SELECT * FROM empleado WHERE empleado_situacion = 1");
 
             // Procesar datos adicionales
             foreach ($empleados as &$empleado) {
@@ -34,19 +34,6 @@ class EmpleadoController extends ActiveRecord
                 
                 // Formatear salario
                 $empleado['salario_formateado'] = 'Q. ' . number_format($empleado['empleado_salario'], 2);
-                
-                // Verificar si la foto del usuario existe físicamente
-                if (!empty($empleado['usuario_fotografia'])) {
-                    $rutaFoto = $_SERVER['DOCUMENT_ROOT'] . '/empresa_celulares/storage/fotos_usuarios/' . $empleado['usuario_fotografia'];
-                    if (!file_exists($rutaFoto)) {
-                        $empleado['usuario_fotografia'] = ''; // Limpiar si el archivo no existe
-                    }
-                }
-                
-                // Asegurar que rol_nombre tenga un valor
-                if (empty($empleado['rol_nombre'])) {
-                    $empleado['rol_nombre'] = 'Sin rol';
-                }
             }
             
             http_response_code(200);
@@ -68,7 +55,7 @@ class EmpleadoController extends ActiveRecord
     }
 
     /**
-     * API para guardar empleado - MEJORADO
+     * API para guardar empleado
      */
     public static function guardarAPI()
     {
@@ -147,7 +134,6 @@ class EmpleadoController extends ActiveRecord
 
             // Crear empleado
             $empleado = new Empleado([
-                'usuario_id' => !empty($_POST['usuario_id']) ? intval($_POST['usuario_id']) : null,
                 'empleado_nom1' => ucwords(strtolower(trim($_POST['empleado_nom1']))),
                 'empleado_nom2' => ucwords(strtolower(trim($_POST['empleado_nom2'] ?? ''))),
                 'empleado_ape1' => ucwords(strtolower(trim($_POST['empleado_ape1']))),
@@ -187,7 +173,7 @@ class EmpleadoController extends ActiveRecord
     }
 
     /**
-     * API para actualizar empleado - MEJORADO
+     * API para actualizar empleado
      */
     public static function modificarAPI()
     {
@@ -278,7 +264,6 @@ class EmpleadoController extends ActiveRecord
 
             // Sincronizar datos
             $empleado->sincronizar([
-                'usuario_id' => !empty($_POST['usuario_id']) ? intval($_POST['usuario_id']) : null,
                 'empleado_nom1' => ucwords(strtolower(trim($_POST['empleado_nom1']))),
                 'empleado_nom2' => ucwords(strtolower(trim($_POST['empleado_nom2'] ?? ''))),
                 'empleado_ape1' => ucwords(strtolower(trim($_POST['empleado_ape1']))),
@@ -318,7 +303,7 @@ class EmpleadoController extends ActiveRecord
     }
 
     /**
-     * API para eliminar empleado - MEJORADO
+     * API para eliminar empleado
      */
     public static function eliminarAPI()
     {

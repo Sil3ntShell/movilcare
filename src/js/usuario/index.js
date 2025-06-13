@@ -141,30 +141,6 @@ const validarConfirmarContrasena = () => {
     }
 };
 
-// CARGAR ROLES PARA EL SELECT
-const cargarRoles = async () => {
-    try {
-        const respuesta = await fetch('/empresa_celulares/rol/buscarAPI');
-        const data = await respuesta.json();
-        
-        const selectRol = document.getElementById('rol_id');
-        if (!selectRol) return;
-        
-        selectRol.innerHTML = '<option value="">Seleccione un rol</option>';
-        
-        if (data.codigo === 1 && data.data) {
-            data.data.forEach(rol => {
-                const option = document.createElement('option');
-                option.value = rol.rol_id;
-                option.textContent = rol.rol_nombre;
-                selectRol.appendChild(option);
-            });
-        }
-    } catch (error) {
-        console.error('Error cargando roles:', error);
-    }
-};
-
 // PREVIEW DE IMAGEN
 const previsualizarImagen = (event) => {
     const file = event.target.files[0];
@@ -357,7 +333,6 @@ const llenarFormulario = async (event) => {
             document.getElementById('usuario_direc').value = usuario.usuario_direc;
             document.getElementById('usuario_dpi').value = usuario.usuario_dpi;
             document.getElementById('usuario_correo').value = usuario.usuario_correo;
-            document.getElementById('rol_id').value = usuario.rol_id;
             
             document.getElementById('usuario_contra').value = '';
             document.getElementById('confirmar_contra').value = '';
@@ -555,10 +530,6 @@ const datatable = new DataTable('#TableUsuarios', {
             data: 'usuario_correo' 
         },
         { 
-            title: 'Rol', 
-            data: 'rol_nombre' 
-        },
-        { 
             title: 'Foto', 
             data: 'usuario_fotografia',
             searchable: false,
@@ -598,8 +569,7 @@ const datatable = new DataTable('#TableUsuarios', {
 
 // Eventos
 document.addEventListener('DOMContentLoaded', () => {
-    // Cargar datos iniciales
-    cargarRoles();
+
     BuscarUsuarios();
     
     // Validaciones

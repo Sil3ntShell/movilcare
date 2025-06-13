@@ -18,7 +18,6 @@ class Usuario extends ActiveRecord
         'usuario_token',
         'usuario_fotografia',
         'usuario_situacion',
-        'rol_id'
     ];
 
     public static $idTabla = 'usuario_id';
@@ -39,7 +38,6 @@ class Usuario extends ActiveRecord
     public $usuario_fecha_contra;
     public $usuario_fotografia;
     public $usuario_situacion;
-    public $rol_id;
     public $usuario_ultimo_acceso;
 
     public function __construct($args = [])
@@ -57,7 +55,6 @@ class Usuario extends ActiveRecord
         $this->usuario_token = $args['usuario_token'] ?? bin2hex(random_bytes(32));
         $this->usuario_fotografia = $args['usuario_fotografia'] ?? '';
         $this->usuario_situacion = $args['usuario_situacion'] ?? 1;
-        $this->rol_id = $args['rol_id'] ?? 1;
         $this->usuario_ultimo_acceso = $args['usuario_ultimo_acceso'] ?? null;
     }
 
@@ -96,7 +93,6 @@ class Usuario extends ActiveRecord
 
         } catch (\Exception $e) {
             error_log("Error en verificarUsuarioExistente: " . $e->getMessage());
-            // Fallback seguro en caso de error
             return ['email_existe' => 0, 'dpi_existe' => 0];
         }
     }
@@ -116,31 +112,6 @@ class Usuario extends ActiveRecord
                 FROM usuario
                 WHERE usuario_situacion = 1
                 ORDER BY usuario_nom1 ASC";
-        
-        return self::fetchArray($sql);
-    }
-
-    // Método para obtener usuarios con información de rol - NUEVO
-    public static function obtenerUsuariosConRol()
-    {
-        $sql = "SELECT 
-                u.usuario_id,
-                u.usuario_nom1,
-                u.usuario_nom2,
-                u.usuario_ape1,
-                u.usuario_ape2,
-                u.usuario_tel,
-                u.usuario_direc,
-                u.usuario_dpi,
-                u.usuario_correo,
-                u.usuario_fotografia,
-                u.usuario_situacion,
-                u.rol_id,
-                r.rol_nombre
-              FROM usuario u
-              LEFT JOIN rol r ON u.rol_id = r.rol_id
-              WHERE u.usuario_situacion = 1
-              ORDER BY u.usuario_id DESC";
         
         return self::fetchArray($sql);
     }

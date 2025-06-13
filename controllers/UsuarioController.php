@@ -22,7 +22,7 @@ class UsuarioController extends ActiveRecord
         $campos = [
             'usuario_nom1', 'usuario_nom2', 'usuario_ape1', 'usuario_ape2',
             'usuario_tel', 'usuario_direc', 'usuario_dpi', 'usuario_correo',
-            'usuario_contra', 'rol_id'
+            'usuario_contra'
         ];
 
         foreach ($campos as $campo) {
@@ -69,7 +69,7 @@ class UsuarioController extends ActiveRecord
             return;
         }
 
-        // Verificar duplicidad - CORREGIDO
+        // Verificar duplicidad
         try {
             $existe = Usuario::verificarUsuarioExistente($_POST['usuario_correo'], $_POST['usuario_dpi']);
             
@@ -117,8 +117,7 @@ class UsuarioController extends ActiveRecord
                 'usuario_contra' => password_hash($_POST['usuario_contra'], PASSWORD_DEFAULT),
                 'usuario_token' => $token,
                 'usuario_fotografia' => $nombreFoto,
-                'usuario_situacion' => 1,
-                'rol_id' => intval($_POST['rol_id'])
+                'usuario_situacion' => 1
             ]);
             
             $resultado = $usuario->crear();
@@ -131,20 +130,15 @@ class UsuarioController extends ActiveRecord
         }
     }
 
-    // API: Buscar Usuarios - SIMPLIFICADO Y CORREGIDO
+    // API: Buscar Usuarios
     public static function buscarAPI()
     {
         try {
-            // Usar el método del modelo que ya incluye el JOIN
-            $data = Usuario::obtenerUsuariosConRol();
+            // Consulta simple sin JOIN de roles
+            $usuarios = self::fetchArray("SELECT * FROM usuario WHERE usuario_situacion = 1");
 
             // Procesar cada usuario para verificar fotos
-            foreach ($data as &$usuario) {
-                // Asegurar que rol_nombre tenga un valor
-                if (empty($usuario['rol_nombre'])) {
-                    $usuario['rol_nombre'] = 'Sin rol';
-                }
-                
+            foreach ($usuarios as &$usuario) {
                 // Verificar si la foto existe físicamente
                 if (!empty($usuario['usuario_fotografia'])) {
                     $rutaFoto = $_SERVER['DOCUMENT_ROOT'] . '/empresa_celulares/storage/fotos_usuarios/' . $usuario['usuario_fotografia'];
@@ -158,7 +152,7 @@ class UsuarioController extends ActiveRecord
             echo json_encode([
                 'codigo' => 1,
                 'mensaje' => 'Usuarios obtenidos correctamente',
-                'data' => $data
+                'data' => $usuarios
             ]);
 
         } catch (Exception $e) {
@@ -188,8 +182,7 @@ class UsuarioController extends ActiveRecord
         // Validar campos requeridos
         $campos = [
             'usuario_nom1', 'usuario_nom2', 'usuario_ape1', 'usuario_ape2',
-            'usuario_tel', 'usuario_direc', 'usuario_dpi', 'usuario_correo',
-            'rol_id'
+            'usuario_tel', 'usuario_direc', 'usuario_dpi', 'usuario_correo'
         ];
 
         foreach ($campos as $campo) {
@@ -235,7 +228,7 @@ class UsuarioController extends ActiveRecord
                 return;
             }
 
-            // Verificar duplicidad (excluyendo el usuario actual) - CORREGIDO
+            // Verificar duplicidad (excluyendo el usuario actual)
             try {
                 $existe = Usuario::verificarUsuarioExistente($_POST['usuario_correo'], $_POST['usuario_dpi'], $id);
                 
@@ -290,7 +283,6 @@ class UsuarioController extends ActiveRecord
                 'usuario_correo' => strtolower(trim($_POST['usuario_correo'])),
                 'usuario_fotografia' => $nombreFoto,
                 'usuario_situacion' => 1,
-                'rol_id' => intval($_POST['rol_id'])
             ];
 
             // Actualizar contraseña solo si se proporciona

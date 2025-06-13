@@ -510,6 +510,16 @@
                                     Empleados
                                 </a>
                             </li>
+                        </ul>
+                    </li>
+
+                    <!-- Gestión de Administrador -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-people"></i>
+                            Admin
+                        </a>
+                        <ul class="dropdown-menu">
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <a class="dropdown-item" href="/empresa_celulares/usuario">
@@ -518,9 +528,21 @@
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="/empresa_celulares/rol">
+                                <a class="dropdown-item" href="/empresa_celulares/aplicacion">
                                     <i class="bi bi-shield-check"></i>
-                                    Roles
+                                    Aplicacion
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="/empresa_celulares/permiso">
+                                    <i class="bi bi-shield-check"></i>
+                                    Permiso
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="/empresa_celulares/asignacion_permiso">
+                                    <i class="bi bi-shield-check"></i>
+                                    Asignar Permiso
                                 </a>
                             </li>
                         </ul>

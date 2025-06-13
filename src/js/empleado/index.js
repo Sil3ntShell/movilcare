@@ -87,30 +87,6 @@ const ValidarDPI = () => {
     }
 };
 
-// Cargar usuarios para el select - Mejorado
-const cargarUsuarios = async () => {
-    try {
-        const respuesta = await fetch('/empresa_celulares/usuario/buscarAPI');
-        const data = await respuesta.json();
-        
-        const selectUsuario = document.getElementById('usuario_id');
-        if (!selectUsuario) return;
-        
-        selectUsuario.innerHTML = '<option value="">Sin usuario asignado</option>';
-        
-        if (data.codigo === 1 && data.data) {
-            data.data.forEach(usuario => {
-                const nombreCompleto = `${usuario.usuario_nom1} ${usuario.usuario_nom2 || ''} ${usuario.usuario_ape1} ${usuario.usuario_ape2 || ''}`.trim();
-                const option = document.createElement('option');
-                option.value = usuario.usuario_id;
-                option.textContent = `${nombreCompleto} (${usuario.usuario_correo})`;
-                selectUsuario.appendChild(option);
-            });
-        }
-    } catch (error) {
-        console.error('Error cargando usuarios:', error);
-    }
-};
 
 // Limpiar formulario - Mejorado
 const limpiarTodo = () => {
@@ -261,7 +237,6 @@ const llenarFormulario = (e) => {
         document.getElementById('empleado_correo').value = datos.empleado_correo || '';
         document.getElementById('empleado_especialidad').value = datos.empleado_especialidad || '';
         document.getElementById('empleado_salario').value = datos.empleado_salario || '';
-        document.getElementById('usuario_id').value = datos.usuario_id || '';
 
         empleadoEditando = datos.empleado_id;
         BtnGuardar.textContent = 'Actualizar Empleado';
@@ -359,23 +334,6 @@ datatable = new DataTable('#TablaEmpleados', {
             render: (data, type, row, meta) => meta.row + 1,
             width: '5%'
         },
-        {
-            title: "Foto",
-            data: "usuario_fotografia",
-            render: (data, type, row) => {
-                if (data && data.trim() !== '') {
-                    const imageUrl = `/empresa_celulares/storage/fotos_usuarios/${data}`;
-                    return `<img src="${imageUrl}" alt="Foto de empleado" style="height: 50px; width: 50px; border-radius: 50%; object-fit: cover;" 
-                            onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjUiIGN5PSIyNSIgcj0iMjUiIGZpbGw9IiM2Yzc1N2QiLz4KPGNpcmNsZSBjeD0iMjUiIGN5PSIyMCIgcj0iNSIgZmlsbD0iI2ZmZmZmZiIvPgo8cGF0aCBkPSJNMzUgMzVBMTAgMTAgMCAwIDAgMTUgMzUiIGZpbGw9IiNmZmZmZmYiLz4KPC9zdmc+Cg==';">`;
-                } else {
-                    return `<i class="bi bi-person-fill text-muted" style="font-size: 30px;"></i>`;
-                }
-            },
-            orderable: false,
-            searchable: false,
-            className: 'text-center',
-            width: '8%'
-        },
         { 
             title: "Nombre Completo", 
             data: null, 
@@ -451,7 +409,6 @@ datatable = new DataTable('#TablaEmpleados', {
 // Event Listeners
 document.addEventListener('DOMContentLoaded', () => {
     // Cargar datos iniciales
-    cargarUsuarios();
     BuscarEmpleados();
     
     // Validaciones en tiempo real

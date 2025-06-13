@@ -1,35 +1,5 @@
-create database empresa_celulares
 
--- Tabla de roles de usuario
-CREATE TABLE rol(
-    rol_id SERIAL PRIMARY KEY,
-    rol_nombre VARCHAR(50) NOT NULL UNIQUE,
-    rol_descripcion VARCHAR(255),
-    rol_fecha_creacion DATE DEFAULT TODAY,
-    rol_situacion SMALLINT DEFAULT 1
-);
-
--- Tabla de usuarios
-CREATE TABLE usuario(
-    usuario_id SERIAL PRIMARY KEY,
-    usuario_nom1 VARCHAR(50) NOT NULL,
-    usuario_nom2 VARCHAR(50) NOT NULL,
-    usuario_ape1 VARCHAR(50) NOT NULL,
-    usuario_ape2 VARCHAR(50) NOT NULL,
-    usuario_tel INT NOT NULL,
-    usuario_direc VARCHAR(150) NOT NULL,
-    usuario_dpi VARCHAR(13) NOT NULL,
-    usuario_correo VARCHAR(100) NOT NULL,
-    usuario_contra LVARCHAR(1056) NOT NULL,
-    usuario_token LVARCHAR(1056) NOT NULL,
-    usuario_fecha_creacion DATE DEFAULT TODAY,
-    usuario_fecha_contra DATE DEFAULT TODAY,
-    usuario_fotografia LVARCHAR(2056),
-    usuario_situacion SMALLINT DEFAULT 1,
-    rol_id INTEGER NOT NULL,
-    usuario_ultimo_acceso DATETIME YEAR TO SECOND,
-    FOREIGN KEY (rol_id) REFERENCES rol(rol_id)
-);
+create database studio404
 
 -- Tabla de marcas de celulares
 CREATE TABLE marca(
@@ -90,7 +60,6 @@ CREATE TABLE cliente(
 -- Tabla de empleados/técnicos
 CREATE TABLE empleado(
     empleado_id SERIAL PRIMARY KEY,
-    usuario_id INTEGER,
     empleado_nom1 VARCHAR(50) NOT NULL,
     empleado_nom2 VARCHAR(50) NOT NULL,
     empleado_ape1 VARCHAR(50) NOT NULL,
@@ -101,8 +70,7 @@ CREATE TABLE empleado(
     empleado_especialidad VARCHAR(100),
     empleado_fecha_contratacion DATE DEFAULT TODAY,
     empleado_salario DECIMAL(10,2),
-    empleado_situacion SMALLINT DEFAULT 1,
-    FOREIGN KEY (usuario_id) REFERENCES usuario(usuario_id)
+    empleado_situacion SMALLINT DEFAULT 1
 );
 
 -- Tabla de tipos de servicio
@@ -196,6 +164,27 @@ CREATE TABLE detalle_venta(
     FOREIGN KEY (orden_id) REFERENCES orden_trabajo(orden_id)
 );
 
+-----------------------------------------------------------------------
+-- Tabla de usuarios
+CREATE TABLE usuario(
+    usuario_id SERIAL PRIMARY KEY,
+    usuario_nom1 VARCHAR(50) NOT NULL,
+    usuario_nom2 VARCHAR(50) NOT NULL,
+    usuario_ape1 VARCHAR(50) NOT NULL,
+    usuario_ape2 VARCHAR(50) NOT NULL,
+    usuario_tel INT NOT NULL,
+    usuario_direc VARCHAR(150) NOT NULL,
+    usuario_dpi VARCHAR(13) NOT NULL,
+    usuario_correo VARCHAR(100) NOT NULL,
+    usuario_contra LVARCHAR(1056) NOT NULL,
+    usuario_token LVARCHAR(1056) NOT NULL,
+    usuario_fecha_creacion DATE DEFAULT TODAY,
+    usuario_fecha_contra DATE DEFAULT TODAY,
+    usuario_fotografia LVARCHAR(2056),
+    usuario_situacion SMALLINT DEFAULT 1,
+    usuario_ultimo_acceso DATETIME YEAR TO SECOND
+);
+
 
 -- Tabla de aplicaciones (módulos o áreas del sistema)
 CREATE TABLE aplicacion (
@@ -239,14 +228,13 @@ CREATE TABLE permiso (
 CREATE TABLE asig_permisos (
     asignacion_id SERIAL PRIMARY KEY,
     asignacion_usuario_id INT NOT NULL,
-    asignacion_app_id INT NOT NULL,
     asignacion_permiso_id INT NOT NULL,
     asignacion_fecha DATE DEFAULT TODAY,
+    asignacion_fecha_quito DATE DEFAULT TODAY, //Fecha cuando se quito
     asignacion_usuario_asigno INT NOT NULL,
     asignacion_motivo VARCHAR(250) NOT NULL,
     asignacion_situacion SMALLINT DEFAULT 1,
     FOREIGN KEY (asignacion_usuario_id) REFERENCES usuario(usuario_id),
-    FOREIGN KEY (asignacion_app_id) REFERENCES aplicacion(app_id),
     FOREIGN KEY (asignacion_permiso_id) REFERENCES permiso(permiso_id)
 );
 
@@ -257,6 +245,7 @@ CREATE TABLE historial_act (
     historial_fecha DATETIME YEAR TO MINUTE,
     historial_ruta INT NOT NULL,
     historial_ejecucion LVARCHAR(1056) NOT NULL,
+    historial_ejecucion_status SMALLINT,
     historial_situacion SMALLINT DEFAULT 1,
     FOREIGN KEY (historial_usuario_id) REFERENCES usuario(usuario_id),
     FOREIGN KEY (historial_ruta) REFERENCES rutas(ruta_id)

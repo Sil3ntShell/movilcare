@@ -50,12 +50,6 @@
           <input type="email" class="form-control" id="empleado_correo" name="empleado_correo" required placeholder="ejemplo@correo.com">
         </div>
       </div>
-      <div class="col-md-4">
-        <label for="usuario_id" class="form-label">Usuario del Sistema</label>
-        <select class="form-select" id="usuario_id" name="usuario_id">
-          <option value="">Sin usuario asignado</option>
-        </select>
-      </div>
     </div>
 
     <!-- ESPECIALIDAD Y SALARIO -->

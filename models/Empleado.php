@@ -6,7 +6,6 @@ class Empleado extends ActiveRecord
 {
     public static $tabla = 'empleado';
     public static $columnasDB = [
-        'usuario_id',
         'empleado_nom1',
         'empleado_nom2',
         'empleado_ape1',
@@ -23,7 +22,6 @@ class Empleado extends ActiveRecord
     
     // Propiedades del modelo
     public $empleado_id;
-    public $usuario_id;
     public $empleado_nom1;
     public $empleado_nom2;
     public $empleado_ape1;
@@ -39,7 +37,6 @@ class Empleado extends ActiveRecord
     public function __construct($args = [])
     {
         $this->empleado_id = $args['empleado_id'] ?? null;
-        $this->usuario_id = $args['usuario_id'] ?? null;
         $this->empleado_nom1 = $args['empleado_nom1'] ?? '';
         $this->empleado_nom2 = $args['empleado_nom2'] ?? '';
         $this->empleado_ape1 = $args['empleado_ape1'] ?? '';
@@ -133,38 +130,7 @@ class Empleado extends ActiveRecord
     }
 
     /**
-     * Obtener empleados con información de usuario - NUEVO
-     */
-    public static function obtenerEmpleadosConUsuario()
-    {
-        $sql = "SELECT 
-                    e.empleado_id,
-                    e.usuario_id,
-                    e.empleado_nom1,
-                    e.empleado_nom2,
-                    e.empleado_ape1,
-                    e.empleado_ape2,
-                    e.empleado_dpi,
-                    e.empleado_tel,
-                    e.empleado_correo,
-                    e.empleado_especialidad,
-                    e.empleado_fecha_contratacion,
-                    e.empleado_salario,
-                    e.empleado_situacion,
-                    u.usuario_fotografia,
-                    u.rol_id,
-                    r.rol_nombre
-                FROM empleado e
-                LEFT JOIN usuario u ON e.usuario_id = u.usuario_id
-                LEFT JOIN rol r ON u.rol_id = r.rol_id
-                WHERE e.empleado_situacion = 1
-                ORDER BY e.empleado_fecha_contratacion DESC, e.empleado_id DESC";
-        
-        return self::fetchArray($sql);
-    }
-
-    /**
-     * Obtener empleado por ID - MEJORADO
+     * Obtener empleado por ID
      */
     public static function obtenerPorId($id)
     {
