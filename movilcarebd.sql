@@ -1,5 +1,16 @@
+-- Tabla de roles de usuario
+--CREATE TABLE rol(
+--    rol_id SERIAL PRIMARY KEY,
+--    rol_nombre VARCHAR(50) NOT NULL UNIQUE,
+--    rol_descripcion VARCHAR(255),
+--    rol_fecha_creacion DATE DEFAULT TODAY,
+--    rol_situacion SMALLINT DEFAULT 1
+--);
 
 create database studio404
+
+
+
 
 -- Tabla de marcas de celulares
 CREATE TABLE marca(
