@@ -19,7 +19,7 @@ module.exports = {
     'js/aplicacion/index' : './src/js/aplicacion/index.js',
     'js/permiso/index' : './src/js/permiso/index.js',
     'js/asignacion_permiso/index' : './src/js/asignacion_permiso/index.js',
-    
+    'js/dashboard/index' : './src/js/dashboard/index.js',
   },
   output: {
     filename: '[name].js',

@@ -429,6 +429,12 @@
                         Dashboard
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/empresa_celulares/dashboard">
+                        <i class="bi bi-house-fill"></i>
+                        Estadisitcas
+                    </a>
+                </li>
 
                 <!-- Ventas & Operaciones -->
                 <?php if (isset($_SESSION['VEN_VIEW']) || isset($_SESSION['REP_VIEW'])): ?>
