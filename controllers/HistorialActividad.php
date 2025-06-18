@@ -4,6 +4,7 @@ namespace Model;
 
 class HistorialActividad extends ActiveRecord
 {
+    
     public static $tabla = 'historial_act';
     
     public static $columnasDB = [

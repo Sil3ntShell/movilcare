@@ -12,6 +12,7 @@ class InventarioController extends ActiveRecord
 {
     public static function renderizarPagina(Router $router)
     {
+        isAuth();
         $router->render('inventario/index', []);
     }
 

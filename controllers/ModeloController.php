@@ -12,6 +12,7 @@ class ModeloController extends ActiveRecord
 {
     public static function renderizarPagina(Router $router)
     {
+        isAuth();
         $router->render('modelo/index', []);
     }
 

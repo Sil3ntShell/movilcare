@@ -11,6 +11,7 @@ class ClienteController extends ActiveRecord
 {
     public static function renderizarPagina(Router $router)
     {
+        isAuth();
         $router->render('cliente/index', []);
     }
 

@@ -11,6 +11,7 @@ class OrdenTrabajoController extends ActiveRecord
 {
     public static function renderizarPagina(Router $router)
     {
+        isAuth();s
         $router->render('ordentrabajo/index', []);
     }
 

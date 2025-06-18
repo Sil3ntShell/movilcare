@@ -25,14 +25,14 @@ class LoginController extends ActiveRecord
 
     public static function login()
     {
-        // CORREGIDO: Limpiar cualquier output previo
+        // Limpiar cualquier output previo
         if (ob_get_level()) {
             ob_clean();
         }
         
         getHeadersApi();
         
-        // CORREGIDO: verificar si ya hay sesión antes de iniciarla
+        // verificar si ya hay sesión antes de iniciarla
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
@@ -64,7 +64,7 @@ class LoginController extends ActiveRecord
                 exit;
             }
 
-            // CORREGIDO: usar sanitizarCadena y quote para evitar SQL injection
+            // usar sanitizarCadena y quote para evitar SQL injection
             $correoSanitizado = sanitizarCadena($correo);
             $queryExisteUser = "SELECT usuario_id, usuario_nom1, usuario_nom2, usuario_ape1, usuario_ape2, usuario_contra, usuario_dpi, usuario_correo 
                                 FROM usuario 
@@ -72,11 +72,11 @@ class LoginController extends ActiveRecord
 
             $existeUsuario = ActiveRecord::fetchFirst($queryExisteUser);
 
-            // CORREGIDO: verificar mejor si el usuario existe
+            // verificar mejor si el usuario existe
             if ($existeUsuario && is_array($existeUsuario) && isset($existeUsuario['usuario_contra'])) {
                 $passDB = $existeUsuario['usuario_contra'];
 
-                // CORREGIDO: verificar si la contraseña está hasheada o es texto plano
+                // verificar si la contraseña está hasheada o es texto plano
                 $passwordValid = false;
                 if (strlen($passDB) > 10 && strpos($passDB, '$') === 0) {
                     // La contraseña parece estar hasheada
@@ -99,7 +99,7 @@ class LoginController extends ActiveRecord
                     // Inicializar array de permisos
                     $_SESSION['permisos'] = [];
 
-                    // CORREGIDO: la consulta de permisos tenía error en el JOIN
+                    // la consulta de permisos tenía error en el JOIN
                     $sqlPermisos = "SELECT ap.*, a.app_nombre_corto, p.permiso_clave 
                                     FROM asig_permisos ap 
                                     INNER JOIN permiso p ON ap.asignacion_permiso_id = p.permiso_id 
@@ -178,7 +178,7 @@ class LoginController extends ActiveRecord
 
     public static function logout()
     {
-        // CORREGIDO: verificar si ya hay sesión antes de iniciarla
+        // verificar si ya hay sesión antes de iniciarla
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }

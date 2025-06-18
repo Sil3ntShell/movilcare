@@ -11,6 +11,7 @@ class RecepcionController extends ActiveRecord
 {
     public static function renderizarPagina(Router $router)
     {
+        isAuth();
         $router->render('recepcion/index', []);
     }
 

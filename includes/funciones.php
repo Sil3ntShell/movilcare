@@ -13,20 +13,21 @@ function s($html) {
     return $s;
 }
 
-// Función que revisa que el usuario este autenticado - CORREGIDA
+// Función que revisa que el usuario este autenticado 
 function isAuth() {
-    // CORREGIDO: verificar si ya hay sesión antes de iniciarla
+    // verificar si ya hay sesión antes de iniciarla
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
     }
     
     if(!isset($_SESSION['login']) || $_SESSION['login'] !== true) {
-        // CORREGIDO: redirigir al login del sistema
+        // redirigir al login del sistema
         header('Location: /' . $_ENV['APP_NAME'] . '/login');
         exit;
     }
     
-    // NUEVO: Verificar si la sesión ha expirado
+    // Verificar si la sesión ha expirado
+
     if (isset($_SESSION['tiempo_limite']) && time() > $_SESSION['tiempo_limite']) {
         $_SESSION = [];
         session_destroy();
@@ -41,12 +42,12 @@ function isAuth() {
 function isAuthApi() {
     getHeadersApi();
     
-    // CORREGIDO: verificar si ya hay sesión antes de iniciarla
+    // verificar si ya hay sesión antes de iniciarla
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
     }
     
-    // CORREGIDO: usar la variable de sesión correcta
+    // usar la variable de sesión correcta
     if(!isset($_SESSION['login']) || $_SESSION['login'] !== true) {
         echo json_encode([    
             "mensaje" => "No esta autenticado",
@@ -55,7 +56,7 @@ function isAuthApi() {
         exit;
     }
     
-    // NUEVO: Verificar expiración en API también
+    // Verificar expiración en API también
     if (isset($_SESSION['tiempo_limite']) && time() > $_SESSION['tiempo_limite']) {
         $_SESSION = [];
         session_destroy();
@@ -71,7 +72,7 @@ function isAuthApi() {
 }
 
 function isNotAuth(){
-    // CORREGIDO: verificar si ya hay sesión antes de iniciarla
+    // verificar si ya hay sesión antes de iniciarla
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
     }
@@ -121,7 +122,7 @@ function asset($ruta){
     return "/". $_ENV['APP_NAME']."/public/" . $ruta;
 }
 
-// NUEVA: Función para sanitizar cadenas
+// Función para sanitizar cadenas
 function sanitizarCadena($valor) {
     return htmlspecialchars(trim($valor), ENT_QUOTES, 'UTF-8');
 }

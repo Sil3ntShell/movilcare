@@ -11,6 +11,7 @@ class RutasController
 {
     public static function renderizarPagina(Router $router)
     {
+        isAuth();
         $router->render('rutas/index', []);
     }
 

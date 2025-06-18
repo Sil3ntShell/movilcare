@@ -12,6 +12,7 @@ class VentaController extends ActiveRecord
 {
     public static function renderizarPagina(Router $router)
     {
+        isAuth();
         $router->render('venta/index', []);
     }
 

@@ -11,6 +11,7 @@ class TipoServicioController extends ActiveRecord
 {
     public static function renderizarPagina(Router $router)
     {
+        isAuth();
         $router->render('tiposervicio/index', []);
     }
 

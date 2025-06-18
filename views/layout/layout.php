@@ -566,12 +566,10 @@
             </ul>
 
             <!-- Botón menú -->
-            <div class="d-grid d-lg-block">
-                <a href="/menu/" class="btn btn-menu">
-                    <i class="bi bi-arrow-bar-left me-2"></i>
-                    MENÚ PRINCIPAL
-                </a>
-            </div>
+           <a href="/empresa_celulares/logout" class="btn btn-menu">
+                <i class="bi bi-box-arrow-right me-2"></i>
+                CERRAR SESIÓN
+            </a>
         </div>
     </div>
 </nav>
