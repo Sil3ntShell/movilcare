@@ -1,68 +1,73 @@
-<div class="row justify-content-center">
-    <div class="col-lg-4 col-md-6 col-sm-8">
-        <div class="card shadow-lg border-0 rounded-lg mt-5">
-            <div class="card-header bg-primary text-white text-center py-4">
-                <h3 class="font-weight-light mb-0">
-                    <i class="bi bi-phone me-2"></i>MovilCare
-                </h3>
-                <p class="mb-0">Sistema de Gestión de Celulares</p>
+<div class="d-flex align-items-center justify-content-center min-vh-100">
+    <div class="login-card shadow-lg border-0 rounded-4" style="width: 100%; max-width: 400px;">
+        
+        <!-- HEADER -->
+        <div class="card-header bg-primary text-white text-center rounded-top-4 py-4">
+            <div class="mb-3">
+                <img src="<?= asset('images/logo.png') ?>" alt="Logo MovilCare" style="width: 60px; height: 60px; border-radius: 50%;">
             </div>
-            <div class="card-body p-5">
-                <form id="formularioLogin">
-                    <div class="mb-3">
-                        <label class="form-label" for="usu_codigo">
-                            <i class="bi bi-person-vcard me-2"></i>DPI
-                        </label>
-                        <input 
-                            class="form-control" 
-                            id="usu_codigo" 
-                            name="usu_codigo" 
-                            type="text" 
-                            placeholder="Ingrese su DPI" 
-                            maxlength="13"
-                            required
-                        />
-                        <div class="invalid-feedback">
-                            Por favor ingrese un DPI válido
-                        </div>
+            <h3 class="mb-0 fw-bold">MovilCare</h3>
+            <p class="mb-0 opacity-75">Sistema de Gestión</p>
+        </div>
+        
+        <!-- BODY -->
+        <div class="card-body p-4" style="background: white; color: #333;">
+            <form id="FormLogin" method="POST">
+                
+                <!-- CORREO -->
+                <div class="mb-3">
+                    <label for="usuario_correo" class="form-label fw-semibold">
+                        <i class="bi bi-envelope-at-fill me-2"></i>Correo electrónico
+                    </label>
+                    <input type="email" 
+                           class="form-control form-control-lg" 
+                           id="usuario_correo" 
+                           name="usuario_correo" 
+                           placeholder="Ingrese su correo" 
+                           required
+                           autocomplete="username">
+                    <div class="form-text">
+                        <small class="text-muted">Ingrese su correo electrónico registrado</small>
                     </div>
-                    
-                    <div class="mb-4">
-                        <label class="form-label" for="usu_password">
-                            <i class="bi bi-key me-2"></i>Contraseña
-                        </label>
-                        <div class="input-group">
-                            <input 
-                                class="form-control" 
-                                id="usu_password" 
-                                name="usu_password" 
-                                type="password" 
-                                placeholder="Ingrese su contraseña"
-                                required
-                            />
-                            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
-                                <i class="bi bi-eye" id="eyeIcon"></i>
-                            </button>
-                        </div>
-                        <div class="invalid-feedback">
-                            Por favor ingrese su contraseña
-                        </div>
-                    </div>
-                    
-                    <div class="d-grid">
-                        <button class="btn btn-primary btn-lg" type="submit" id="btnLogin">
-                            <i class="bi bi-box-arrow-in-right me-2"></i>
-                            Iniciar Sesión
+                </div>
+
+                <!-- CONTRASEÑA -->
+                <div class="mb-4">
+                    <label for="usuario_contra" class="form-label fw-semibold">
+                        <i class="bi bi-lock-fill me-2"></i>Contraseña
+                    </label>
+                    <div class="input-group">
+                        <input type="password" 
+                               class="form-control form-control-lg" 
+                               id="usuario_contra" 
+                               name="usuario_contra" 
+                               placeholder="Ingrese su contraseña" 
+                               required
+                               autocomplete="current-password">
+                        <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                            <i class="bi bi-eye" id="eyeIcon"></i>
                         </button>
                     </div>
-                </form>
-            </div>
-            
-            <div class="card-footer text-center py-3">
-                <div class="small text-muted">
-                    © <?= date('Y') ?> MovilCare - Sistema de Gestión
                 </div>
-            </div>
+
+                <!-- BOTÓN -->
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary btn-lg" id="BtnLogin">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>
+                        <span id="loginText">Iniciar Sesión</span>
+                        <span id="BtnIniciar" class="spinner-border spinner-border-sm ms-2 d-none"></span>
+                    </button>
+                </div>
+
+            </form>
+        </div>
+        
+        <!-- FOOTER -->
+        <div class="card-footer text-center text-muted py-3" style="background: #f8f9fa; border-bottom-left-radius: 1rem; border-bottom-right-radius: 1rem;">
+            <small>
+                <i class="bi bi-shield-check me-1"></i>
+                Sistema seguro - Versión 1.0
+            </small>
         </div>
     </div>
 </div>

@@ -7,8 +7,7 @@ class Venta extends ActiveRecord
     public static $tabla = 'venta';
     public static $columnasDB = [
         'cliente_id',
-        'usuario_id',
-        // Quitar venta_fecha porque usa DEFAULT CURRENT YEAR TO SECOND
+        'empleado_id',
         'venta_subtotal',
         'venta_descuento',
         'venta_impuestos',
@@ -24,7 +23,7 @@ class Venta extends ActiveRecord
     // Propiedades del modelo
     public $venta_id;
     public $cliente_id;
-    public $usuario_id;
+    public $empleado_id;  // cambiado
     public $venta_fecha;
     public $venta_subtotal;
     public $venta_descuento;
@@ -39,8 +38,7 @@ class Venta extends ActiveRecord
     {
         $this->venta_id = $args['venta_id'] ?? null;
         $this->cliente_id = $args['cliente_id'] ?? null;
-        $this->usuario_id = $args['usuario_id'] ?? null;
-        // Para Informix, usar fecha actual o NULL para que use DEFAULT CURRENT
+        $this->empleado_id = $args['empleado_id'] ?? null;  // cambiado
         $this->venta_fecha = $args['venta_fecha'] ?? null;
         $this->venta_subtotal = $args['venta_subtotal'] ?? 0;
         $this->venta_descuento = $args['venta_descuento'] ?? 0;
@@ -97,7 +95,6 @@ class Venta extends ActiveRecord
         $año = date('Y');
         $mes = date('m');
         
-        // Buscar el último número de venta del mes usando funciones de Informix
         $query = "SELECT COUNT(*) as count FROM venta WHERE YEAR(venta_fecha) = $año AND MONTH(venta_fecha) = $mes";
         $resultado = self::fetchArray($query);
         $numero = ($resultado[0]['count'] ?? 0) + 1;

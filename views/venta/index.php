@@ -6,6 +6,7 @@
 
   <form name="FormularioVenta" id="FormularioVenta" method="POST">
     <input type="hidden" id="venta_id" name="venta_id">
+    <input type="hidden" id="empleado_id" name="empleado_id" value="<?= $_SESSION['empleado_id'] ?? '' ?>">
     <input type="hidden" id="venta_subtotal" name="venta_subtotal" value="0">
     <input type="hidden" id="venta_descuento" name="venta_descuento" value="0">
     <input type="hidden" id="venta_impuestos" name="venta_impuestos" value="0">
@@ -14,7 +15,7 @@
     <div class="row">
       <!-- COLUMNA IZQUIERDA: FORMULARIO -->
       <div class="col-lg-8">
-        
+
         <!-- INFORMACIÓN DE LA VENTA -->
         <div class="card mb-3 shadow-sm">
           <div class="card-header bg-primary text-white">
@@ -129,87 +130,47 @@
 
       <!-- COLUMNA DERECHA: RESUMEN Y TOTALES -->
       <div class="col-lg-4">
-        
+
         <!-- RESUMEN DE TOTALES -->
         <div class="card shadow-lg sticky-top" style="top: 20px;">
           <div class="card-header bg-gradient text-white text-center" style="background: linear-gradient(135deg, #28a745, #20c997);">
             <h4 class="mb-0"><i class="bi bi-calculator me-2"></i>Resumen de Venta</h4>
           </div>
           <div class="card-body">
-            
+
             <!-- Totales -->
             <div class="mb-4">
-              <div class="row mb-2">
-                <div class="col-6">
-                  <span class="fs-6 fw-bold">Subtotal:</span>
-                </div>
-                <div class="col-6 text-end">
-                  <span class="fs-6 fw-bold text-success" id="subtotal_display">Q. 0.00</span>
-                </div>
-              </div>
-              
-              <div class="row mb-2">
-                <div class="col-6">
-                  <span class="fs-6">Descuento:</span>
-                </div>
-                <div class="col-6 text-end">
-                  <input type="number" class="form-control form-control-sm text-end" 
-                         id="venta_descuento_input" step="0.01" min="0" value="0" 
-                         style="width: 100px; display: inline-block;">
-                </div>
-              </div>
-              
-              <div class="row mb-2">
-                <div class="col-6">
-                  <span class="fs-6">Impuestos (IVA):</span>
-                </div>
-                <div class="col-6 text-end">
-                  <input type="number" class="form-control form-control-sm text-end" 
-                         id="venta_impuestos_input" step="0.01" min="0" value="0" 
-                         style="width: 100px; display: inline-block;">
-                </div>
-              </div>
-              
-              <hr>
-              
-              <div class="row">
-                <div class="col-6">
-                  <span class="fs-4 fw-bold text-primary">TOTAL:</span>
-                </div>
-                <div class="col-6 text-end">
-                  <span class="fs-3 fw-bold text-primary" id="total_display">Q. 0.00</span>
-                </div>
-              </div>
-            </div>
+              <!-- Subtotal / Descuento / Impuestos -->
+              <!-- ... (igual que ya tienes) ... -->
 
-            <!-- Estado de la venta -->
-            <div class="mb-3">
-              <label for="venta_estado" class="form-label fw-bold">Estado de la Venta</label>
-              <select class="form-select" id="venta_estado" name="venta_estado">
-                <option value="PENDIENTE">Pendiente</option>
-                <option value="PROCESANDO">Procesando</option>
-                <option value="COMPLETADA" selected>Completada</option>
-                <option value="FACTURADA">Facturada</option>
-              </select>
-            </div>
+              <!-- Estado de la venta -->
+              <div class="mb-3">
+                <label for="venta_estado" class="form-label fw-bold">Estado de la Venta</label>
+                <select class="form-select" id="venta_estado" name="venta_estado">
+                  <option value="PENDIENTE">Pendiente</option>
+                  <option value="PROCESANDO">Procesando</option>
+                  <option value="COMPLETADA" selected>Completada</option>
+                  <option value="FACTURADA">Facturada</option>
+                </select>
+              </div>
 
-            <!-- Observaciones -->
-            <div class="mb-4">
-              <label for="venta_observaciones" class="form-label fw-bold">Observaciones</label>
-              <textarea class="form-control" id="venta_observaciones" name="venta_observaciones" 
-                        rows="2" placeholder="Comentarios sobre la venta..."></textarea>
-            </div>
+              <!-- Observaciones -->
+              <div class="mb-4">
+                <label for="venta_observaciones" class="form-label fw-bold">Observaciones</label>
+                <textarea class="form-control" id="venta_observaciones" name="venta_observaciones" rows="2" placeholder="Comentarios sobre la venta..."></textarea>
+              </div>
 
-            <!-- Botones de Acción -->
-            <div class="d-grid gap-2">
-              <button type="submit" class="btn btn-success btn-lg fw-bold" id="BtnGuardar">
-                <i class="bi bi-check-circle me-2"></i>PROCESAR VENTA
-              </button>
-              <button type="button" class="btn btn-outline-secondary" id="BtnLimpiar">
-                <i class="bi bi-arrow-clockwise me-2"></i>Nueva Venta
-              </button>
-            </div>
+              <!-- Botones de Acción -->
+              <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-success btn-lg fw-bold" id="BtnGuardar">
+                  <i class="bi bi-check-circle me-2"></i>PROCESAR VENTA
+                </button>
+                <button type="button" class="btn btn-outline-secondary" id="BtnLimpiar">
+                  <i class="bi bi-arrow-clockwise me-2"></i>Nueva Venta
+                </button>
+              </div>
 
+            </div>
           </div>
         </div>
 
@@ -236,7 +197,7 @@
                   <th>No. Venta</th>
                   <th>Fecha</th>
                   <th>Cliente</th>
-                  <th>Usuario</th>
+                  <th>Empleado</th>
                   <th>Subtotal</th>
                   <th>Total</th>
                   <th>Estado</th>
@@ -273,4 +234,3 @@
 
 <!-- Script del módulo -->
 <script src="<?= asset('build/js/venta/index.js') ?>"></script>
-

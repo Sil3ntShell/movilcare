@@ -404,59 +404,69 @@
 
 </head>
 <body>
- <nav class="navbar navbar-expand-lg navbar-custom">
-        <div class="container-fluid">
-            <!-- Brand -->
-            <a class="navbar-brand" href="/empresa_celulares/">
-                <img src="<?= asset('./images/logo.png') ?>" width="35px" alt="movilcare">
-                <span>MovilCare</span>
-            </a>
+<nav class="navbar navbar-expand-lg navbar-custom">
+    <div class="container-fluid">
 
-            <!-- Toggler -->
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+        <!-- Brand -->
+        <a class="navbar-brand" href="/empresa_celulares/">
+            <img src="<?= asset('./images/logo.png') ?>" width="35px" alt="movilcare">
+            <span>MovilCare</span>
+        </a>
 
-            <!-- Navbar content -->
-            <div class="collapse navbar-collapse" id="navbarContent">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <!-- Dashboard -->
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/empresa_celulares/">
-                            <i class="bi bi-house-fill"></i>
-                            Dashboard
-                        </a>
-                    </li>
+        <!-- Toggler -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-                    <!-- Ventas y Operaciones -->
+        <!-- Navbar content -->
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+                <!-- Dashboard -->
+                <li class="nav-item">
+                    <a class="nav-link active" href="/empresa_celulares/">
+                        <i class="bi bi-house-fill"></i>
+                        Dashboard
+                    </a>
+                </li>
+
+                <!-- Ventas & Operaciones -->
+                <?php if (isset($_SESSION['VEN_VIEW']) || isset($_SESSION['REP_VIEW'])): ?>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-cash-stack"></i>
                             Ventas & Operaciones
                         </a>
                         <ul class="dropdown-menu">
-                            <li>
-                                <a class="dropdown-item" href="/empresa_celulares/venta">
-                                    <i class="bi bi-cash-coin"></i>
-                                    Ventas
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" href="/empresa_celulares/recepcion">
-                                    <i class="bi bi-inbox"></i>
-                                    Recepción
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" href="/empresa_celulares/ordentrabajo">
-                                    <i class="bi bi-clipboard-check"></i>
-                                    Orden de Trabajo
-                                </a>
-                            </li>
+                            <?php if (isset($_SESSION['VEN_VIEW'])): ?>
+                                <li>
+                                    <a class="dropdown-item" href="/empresa_celulares/venta">
+                                        <i class="bi bi-cash-coin"></i>
+                                        Ventas
+                                    </a>
+                                </li>
+                            <?php endif; ?>
+
+                            <?php if (isset($_SESSION['REP_VIEW'])): ?>
+                                <li>
+                                    <a class="dropdown-item" href="/empresa_celulares/recepcion">
+                                        <i class="bi bi-inbox"></i>
+                                        Recepción
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="/empresa_celulares/ordentrabajo">
+                                        <i class="bi bi-clipboard-check"></i>
+                                        Orden de Trabajo
+                                    </a>
+                                </li>
+                            <?php endif; ?>
                         </ul>
                     </li>
+                <?php endif; ?>
 
-                    <!-- Servicios y Productos -->
+                <!-- Servicios & Productos -->
+                <?php if (isset($_SESSION['INV_VIEW'])): ?>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-gear-wide-connected"></i>
@@ -490,8 +500,10 @@
                             </li>
                         </ul>
                     </li>
+                <?php endif; ?>
 
-                    <!-- Gestión de Personas -->
+                <!-- Gestión de Personas -->
+                <?php if (isset($_SESSION['CLI_VIEW'])): ?>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-people"></i>
@@ -512,8 +524,10 @@
                             </li>
                         </ul>
                     </li>
+                <?php endif; ?>
 
-                    <!-- Gestión de Administrador -->
+                <!-- Administración -->
+                <?php if (isset($_SESSION['SEG_ADMIN'])): ?>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-people"></i>
@@ -547,18 +561,21 @@
                             </li>
                         </ul>
                     </li>
-                </ul>
+                <?php endif; ?>
 
-                <!-- Botón de menú -->
-                <div class="d-grid d-lg-block">
-                    <a href="/menu/" class="btn btn-menu">
-                        <i class="bi bi-arrow-bar-left me-2"></i>
-                        MENÚ PRINCIPAL
-                    </a>
-                </div>
+            </ul>
+
+            <!-- Botón menú -->
+            <div class="d-grid d-lg-block">
+                <a href="/menu/" class="btn btn-menu">
+                    <i class="bi bi-arrow-bar-left me-2"></i>
+                    MENÚ PRINCIPAL
+                </a>
             </div>
         </div>
-    </nav>
+    </div>
+</nav>
+
     <div class="progress fixed-bottom" style="height: 6px;">
         <div class="progress-bar progress-bar-animated bg-danger" id="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"></div>
     </div>

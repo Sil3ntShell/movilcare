@@ -33,8 +33,8 @@ class AsignacionPermiso extends ActiveRecord
         $this->asignacion_id = $args['asignacion_id'] ?? null;
         $this->asignacion_usuario_id = $args['asignacion_usuario_id'] ?? null;
         $this->asignacion_permiso_id = $args['asignacion_permiso_id'] ?? null;
-        $this->asignacion_fecha = $args['asignacion_fecha'] ?? null; // Cambiado para no asignar fecha automáticamente
-        $this->asignacion_fecha_quito = $args['asignacion_fecha_quito'] ?? null;
+        // $this->asignacion_fecha = $args['asignacion_fecha'] ?? null; // Cambiado para no asignar fecha automáticamente
+        // $this->asignacion_fecha_quito = $args['asignacion_fecha_quito'] ?? null;
         $this->asignacion_usuario_asigno = $args['asignacion_usuario_asigno'] ?? null;
         $this->asignacion_motivo = $args['asignacion_motivo'] ?? '';
         $this->asignacion_situacion = $args['asignacion_situacion'] ?? 1;

@@ -1,145 +1,82 @@
-import Swal from "sweetalert2";
+import Swal from 'sweetalert2';
+import { validarFormulario } from '../funciones';
 
-// Elementos del DOM
-const formularioLogin = document.getElementById('formularioLogin');
-const usuCodigo = document.getElementById('usu_codigo');
-const usuPassword = document.getElementById('usu_password');
-const btnLogin = document.getElementById('btnLogin');
+const FormLogin = document.getElementById('FormLogin');
+const BtnIniciar = document.getElementById('BtnIniciar');
 
-// Función para validar DPI guatemalteco
-const validarDPI = (dpi) => {
-    if (dpi.length !== 13) return false;
-    if (!/^\d{13}$/.test(dpi)) return false;
-    return true;
-};
+const login = async (e) => {
+    e.preventDefault();
+    BtnIniciar.disabled = true;
 
-// Función para validar formulario
-const validarFormulario = () => {
-    let esValido = true;
-    
-    // Validar DPI
-    if (!usuCodigo.value.trim()) {
-        usuCodigo.classList.add('is-invalid');
-        esValido = false;
-    } else if (!validarDPI(usuCodigo.value.trim())) {
-        usuCodigo.classList.add('is-invalid');
+    if (!validarFormulario(FormLogin, [])) {
         Swal.fire({
-            icon: 'error',
-            title: 'DPI inválido',
-            text: 'El DPI debe tener exactamente 13 dígitos'
+            title: "Campos vacíos",
+            text: "Debe llenar todos los campos",
+            icon: "info"
         });
-        esValido = false;
-    } else {
-        usuCodigo.classList.remove('is-invalid');
-        usuCodigo.classList.add('is-valid');
-    }
-    
-    // Validar contraseña
-    if (!usuPassword.value.trim()) {
-        usuPassword.classList.add('is-invalid');
-        esValido = false;
-    } else {
-        usuPassword.classList.remove('is-invalid');
-        usuPassword.classList.add('is-valid');
-    }
-    
-    return esValido;
-};
-
-// Función para realizar login
-const realizarLogin = async (event) => {
-    event.preventDefault();
-    
-    if (!validarFormulario()) {
+        BtnIniciar.disabled = false;
         return;
     }
-    
-    // Deshabilitar botón y mostrar loading
-    btnLogin.disabled = true;
-    btnLogin.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Iniciando sesión...';
-    
+
     try {
-        const formData = new FormData(formularioLogin);
-        
-        // RUTA CORREGIDA - Debe coincidir con las rutas definidas en tu Router
-        const respuesta = await fetch('/empresa_celulares/login/loginAPI', {
+        const body = new FormData(FormLogin);
+        const url = '/empresa_celulares/login/iniciar';
+
+        const config = {
             method: 'POST',
-            body: formData
-        });
-        
-        // Verificar si la respuesta es válida
-        if (!respuesta.ok) {
-            throw new Error(`HTTP error! status: ${respuesta.status}`);
+            body
+        };
+
+        console.log('Enviando petición a:', url);
+
+        const respuesta = await fetch(url, config);
+
+        const contentType = respuesta.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+            throw new Error("La respuesta del servidor no es JSON válido");
         }
-        
+
         const data = await respuesta.json();
-        
-        if (data.codigo === 1) {
-            // Login exitoso
-            Swal.fire({
+        const { codigo, mensaje, datos } = data;
+
+        if (codigo == 1) {
+            await Swal.fire({
+                title: 'Bienvenido',
+                text: mensaje,
                 icon: 'success',
-                title: '¡Bienvenido!',
-                text: data.mensaje,
                 timer: 1500,
                 showConfirmButton: false
-            }).then(() => {
-                // Redirigir al dashboard principal
-                window.location.href = '/empresa_celulares/';
             });
+
+            FormLogin.reset();
+
+            // Redirigir a la URL que envía el controlador
+            const destino = datos?.redirect_url ?? '/empresa_celulares/';
+            location.href = destino;
+
         } else {
-            // Error en login
             Swal.fire({
-                icon: 'error',
-                title: 'Error de autenticación',
-                text: data.mensaje
+                title: '¡Error!',
+                text: mensaje,
+                icon: 'warning',
+                showConfirmButton: true
             });
         }
-    } catch (error) {
-        console.error('Error en login:', error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Error de conexión',
-            text: 'No se pudo conectar con el servidor. Verifique la URL o intente nuevamente.'
-        });
-    } finally {
-        // Restaurar botón
-        btnLogin.disabled = false;
-        btnLogin.innerHTML = '<i class="bi bi-box-arrow-in-right me-2"></i>Iniciar Sesión';
-    }
-};
 
-// Event Listeners
-document.addEventListener('DOMContentLoaded', () => {
-    // Submit del formulario
-    if (formularioLogin) {
-        formularioLogin.addEventListener('submit', realizarLogin);
-    }
-    
-    // Validación en tiempo real del DPI
-    if (usuCodigo) {
-        usuCodigo.addEventListener('input', (e) => {
-            // Solo permitir números
-            e.target.value = e.target.value.replace(/\D/g, '');
-            
-            // Limitar a 13 caracteres
-            if (e.target.value.length > 13) {
-                e.target.value = e.target.value.slice(0, 13);
-            }
-            
-            // Remover clases de validación mientras escribe
-            e.target.classList.remove('is-valid', 'is-invalid');
+    } catch (error) {
+        console.log(error);
+
+        Swal.fire({
+            title: '¡Error de conexión!',
+            text: 'No se pudo conectar con el servidor',
+            icon: 'error',
+            showConfirmButton: true
         });
     }
-    
-    // Remover clases de validación en contraseña
-    if (usuPassword) {
-        usuPassword.addEventListener('input', (e) => {
-            e.target.classList.remove('is-valid', 'is-invalid');
-        });
-    }
-    
-    // Enfocar el campo DPI al cargar
-    if (usuCodigo) {
-        usuCodigo.focus();
-    }
-});
+
+    BtnIniciar.disabled = false;
+}
+
+if (FormLogin) {
+    FormLogin.addEventListener('submit', login);
+}

@@ -5,6 +5,7 @@
   <form name="FormularioClientes" id="FormularioClientes" method="POST">
     <input type="hidden" id="cliente_id" name="cliente_id">
 
+    <!-- Nombres -->
     <div class="row g-3 mb-3">
       <div class="col-md-6">
         <label for="cliente_nom1" class="form-label">Primer Nombre <span class="text-danger">*</span></label>
@@ -16,6 +17,7 @@
       </div>
     </div>
 
+    <!-- Apellidos -->
     <div class="row g-3 mb-3">
       <div class="col-md-6">
         <label for="cliente_ape1" class="form-label">Primer Apellido <span class="text-danger">*</span></label>
@@ -27,6 +29,7 @@
       </div>
     </div>
 
+    <!-- DPI / NIT -->
     <div class="row g-3 mb-3">
       <div class="col-md-6">
         <label for="cliente_dpi" class="form-label">DPI</label>
@@ -38,30 +41,41 @@
       </div>
     </div>
 
+    <!-- Correo / Teléfono -->
     <div class="row g-3 mb-3">
-      <div class="col-md-6">
+      <div class="col-md-8">
         <label for="cliente_correo" class="form-label">Correo Electrónico</label>
         <div class="input-group">
           <span class="input-group-text"><i class="bi bi-envelope"></i></span>
           <input type="email" class="form-control" id="cliente_correo" name="cliente_correo" placeholder="ejemplo@correo.com">
         </div>
       </div>
-      <div class="col-md-3">
+      <div class="col-md-4">
         <label for="cliente_tel" class="form-label">Teléfono <span class="text-danger">*</span></label>
         <input type="text" class="form-control" id="cliente_tel" name="cliente_tel" required placeholder="Ej. 22334455">
       </div>
     </div>
 
+    <!-- Dirección -->
     <div class="mb-3">
       <label for="cliente_direc" class="form-label">Dirección <span class="text-danger">*</span></label>
       <input type="text" class="form-control" id="cliente_direc" name="cliente_direc" required placeholder="Ej. Zona 1, Ciudad de Guatemala">
     </div>
 
+    <!-- Fecha nacimiento -->
+    <div class="mb-3">
+      <label for="cliente_fecha_nacimiento" class="form-label">Fecha de Nacimiento</label>
+      <input type="date" id="cliente_fecha_nacimiento" name="cliente_fecha_nacimiento" lang="en" />
+
+    </div>
+
+    <!-- Observaciones -->
     <div class="mb-3">
       <label for="cliente_observaciones" class="form-label">Observaciones</label>
       <textarea class="form-control" id="cliente_observaciones" name="cliente_observaciones" rows="3" placeholder="Comentarios adicionales..."></textarea>
     </div>
 
+    <!-- Botones -->
     <div class="row justify-content-center mt-4 g-2">
       <div class="col-auto">
         <button type="submit" class="btn btn-success px-4" id="BtnGuardar">

@@ -406,7 +406,7 @@ const GuardarVenta = async (event) => {
 
     try {
         const formData = new FormData(FormularioVenta);
-        formData.append('usuario_id', usuarioActual);
+        formData.append('empleado_id', empleado_id); // <- AQUI EL CAMBIO
         formData.append('detalles', JSON.stringify(detalleVenta));
         
         const respuesta = await fetch('/empresa_celulares/venta/guardarAPI', {
@@ -437,6 +437,7 @@ const GuardarVenta = async (event) => {
     BtnGuardar.disabled = false;
 };
 
+
 // Buscar ventas
 const BuscarVentas = async () => {
     try {
@@ -461,7 +462,6 @@ const BuscarVentas = async () => {
 // DataTable configuración
 let datatable;
 
-// Inicializar DataTable solo si existe el elemento
 const inicializarDataTable = () => {
     const tablaVentas = document.getElementById('TablaVentas');
     if (tablaVentas) {
@@ -495,7 +495,7 @@ const inicializarDataTable = () => {
                     }
                 },
                 { title: "Cliente", data: "cliente_nombre" },
-                { title: "Usuario", data: "usuario_nombre" },
+                { title: "Empleado", data: "empleado_nombre" }, // <---- CAMBIO
                 { 
                     title: "Subtotal", 
                     data: "venta_subtotal",
@@ -548,7 +548,6 @@ const inicializarDataTable = () => {
             pageLength: 10
         });
 
-        // Event listeners para la tabla
         datatable.on('click', '.ver-detalle', verDetalle);
         datatable.on('click', '.eliminar', EliminarVenta);
         datatable.on('click', '.cambiar-estado', CambiarEstado);

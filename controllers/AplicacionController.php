@@ -85,6 +85,9 @@ class AplicacionController extends ActiveRecord
     {
         try {
             $aplicaciones = self::fetchArray("SELECT * FROM aplicacion WHERE app_situacion = 1 ORDER BY app_nombre_corto");
+        
+            if (!is_array($aplicaciones)) { $aplicaciones = []; }
+
 
             http_response_code(200);
             echo json_encode([

@@ -21,7 +21,7 @@ class VentaController extends ActiveRecord
         getHeadersApi();
 
         $campos = [
-            'cliente_id', 'usuario_id', 'venta_subtotal', 'venta_descuento', 
+            'cliente_id', 'empleado_id', 'venta_subtotal', 'venta_descuento', 
             'venta_impuestos', 'venta_total', 'venta_forma_pago', 'venta_estado'
         ];
 
@@ -53,7 +53,7 @@ class VentaController extends ActiveRecord
         try {
             $venta = new Venta([
                 'cliente_id' => intval($_POST['cliente_id']),
-                'usuario_id' => intval($_POST['usuario_id']),
+                'empleado_id' => intval($_POST['empleado_id']),
                 'venta_subtotal' => floatval($_POST['venta_subtotal']),
                 'venta_descuento' => floatval($_POST['venta_descuento']),
                 'venta_impuestos' => floatval($_POST['venta_impuestos']),
@@ -119,25 +119,20 @@ class VentaController extends ActiveRecord
     public static function buscarAPI()
     {
         try {
-            // Query súper simple - solo ventas
             $query = "SELECT * FROM venta WHERE venta_situacion = 1 ORDER BY venta_id DESC";
             $ventas = self::fetchArray($query);
-            
-            // Agregar datos básicos
+
             foreach ($ventas as &$venta) {
-                // Generar número de venta
                 $año = date('Y', strtotime($venta['venta_fecha']));
                 $mes = date('m', strtotime($venta['venta_fecha']));
                 $venta['numero_venta'] = sprintf("V-%s%s-%04d", $año, $mes, $venta['venta_id']);
                 
-                // Nombres por defecto
                 $venta['cliente_nombre'] = 'Cliente ID: ' . $venta['cliente_id'];
-                $venta['usuario_nombre'] = 'Usuario ID: ' . $venta['usuario_id'];
-                
-                // Detalle simple
+                $venta['empleado_nombre'] = 'Empleado ID: ' . $venta['empleado_id'];
+
                 $venta['detalle'] = [];
             }
-            
+
             echo json_encode([
                 'codigo' => 1,
                 'mensaje' => 'Ventas encontradas',
@@ -148,96 +143,6 @@ class VentaController extends ActiveRecord
             echo json_encode([
                 'codigo' => 0,
                 'mensaje' => 'Error al cargar ventas',
-                'detalle' => $e->getMessage()
-            ]);
-        }
-    }
-
-    // API: Obtener productos del inventario
-    public static function obtenerProductosAPI()
-    {
-        try {
-            // Query corregida para Informix - usar campos reales de inventario
-            $query = "SELECT 
-                        i.inventario_id,
-                        TRIM(COALESCE(m.marca_nombre, '')) || ' ' || TRIM(COALESCE(mo.modelo_nombre, '')) || ' - ' || TRIM(COALESCE(i.inventario_observaciones, '')) as inventario_descripcion,
-                        i.inventario_precio_venta,
-                        i.inventario_stock_disponible as inventario_stock,
-                        m.marca_nombre,
-                        mo.modelo_nombre
-                      FROM inventario i
-                      LEFT JOIN modelo mo ON i.modelo_id = mo.modelo_id
-                      LEFT JOIN marca m ON mo.marca_id = m.marca_id
-                      WHERE i.inventario_situacion = 1 AND i.inventario_stock_disponible > 0
-                      ORDER BY m.marca_nombre ASC, mo.modelo_nombre ASC";
-                      
-            $productos = self::fetchArray($query);
-            
-            // Debug: Log para verificar productos
-            error_log("Productos obtenidos: " . count($productos));
-            
-            http_response_code(200);
-            echo json_encode(['codigo' => 1, 'mensaje' => 'Éxito', 'data' => $productos]);
-        } catch (Exception $e) {
-            error_log("Error en obtenerProductosAPI: " . $e->getMessage());
-            http_response_code(500);
-            echo json_encode(['codigo' => 0, 'mensaje' => 'Error al obtener productos', 'detalle' => $e->getMessage()]);
-        }
-    }
-
-    // API: Obtener órdenes de trabajo completadas para vender como servicio
-    public static function obtenerServiciosAPI()
-    {
-        try {
-            // Query compatible con Informix
-            $query = "SELECT 
-                        ot.orden_id,
-                        COALESCE(ot.orden_diagnostico, 'Servicio completado') as orden_diagnostico,
-                        COALESCE(ot.orden_costo_total, 0) as orden_costo_total,
-                        TRIM(COALESCE(c.cliente_nom1, '')) || ' ' || TRIM(COALESCE(c.cliente_ape1, '')) as cliente_nombre,
-                        COALESCE(ts.tipo_servicio_nombre, 'Servicio') as tipo_servicio_nombre,
-                        COALESCE(r.recepcion_marca, '') as recepcion_marca,
-                        COALESCE(r.recepcion_modelo, '') as recepcion_modelo,
-                        COALESCE(r.recepcion_tipo_celular, 'Dispositivo') as recepcion_tipo_celular,
-                        ot.orden_estado
-                      FROM orden_trabajo ot
-                      LEFT JOIN recepcion r ON ot.recepcion_id = r.recepcion_id
-                      LEFT JOIN cliente c ON r.cliente_id = c.cliente_id
-                      LEFT JOIN tipo_servicio ts ON ot.tipo_servicio_id = ts.tipo_servicio_id
-                      WHERE ot.orden_situacion = 1 
-                      AND ot.orden_estado IN ('COMPLETADA', 'REPARADO')
-                      AND ot.orden_costo_total > 0
-                      ORDER BY ot.orden_fecha_asignacion DESC";
-                      
-            $servicios = self::fetchArray($query);
-            
-            // Debug: Log para verificar qué datos se obtienen
-            error_log("Servicios obtenidos: " . count($servicios));
-            
-            // Procesar datos para asegurar que tengan la información necesaria
-            foreach ($servicios as &$servicio) {
-                // Crear descripción del dispositivo
-                $dispositivo = trim($servicio['recepcion_marca'] . ' ' . $servicio['recepcion_modelo']);
-                if (empty($dispositivo)) {
-                    $dispositivo = $servicio['recepcion_tipo_celular'];
-                }
-                $servicio['dispositivo_descripcion'] = $dispositivo;
-            }
-            
-            http_response_code(200);
-            echo json_encode([
-                'codigo' => 1, 
-                'mensaje' => 'Servicios obtenidos correctamente', 
-                'data' => $servicios,
-                'total' => count($servicios)
-            ]);
-            
-        } catch (Exception $e) {
-            error_log("Error en obtenerServiciosAPI: " . $e->getMessage());
-            http_response_code(500);
-            echo json_encode([
-                'codigo' => 0, 
-                'mensaje' => 'Error al obtener servicios', 
                 'detalle' => $e->getMessage()
             ]);
         }
@@ -263,12 +168,10 @@ class VentaController extends ActiveRecord
                 exit;
             }
 
-            // Eliminar venta (lógico)
             $venta->sincronizar(['venta_situacion' => 0]);
             $resultado = $venta->actualizar();
 
             if ($resultado['resultado']) {
-                // También eliminar detalles
                 $deleteDetalles = "UPDATE detalle_venta SET detalle_situacion = 0 WHERE venta_id = " . intval($id);
                 self::$db->exec($deleteDetalles);
 

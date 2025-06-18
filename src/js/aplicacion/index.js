@@ -92,17 +92,35 @@ const BuscarAplicaciones = async () => {
     try {
         const res = await fetch(url);
         const { codigo, mensaje, data } = await res.json();
+
+        datatable.clear().draw();
+
         if (codigo == 1) {
-            datatable.clear().draw();
-            datatable.rows.add(data).draw();
+            if (data.length > 0) {
+                datatable.rows.add(data).draw();
+            } else {
+                Swal.fire({
+                    icon: "info",
+                    title: "Sin resultados",
+                    text: "No se han encontrado aplicaciones registradas",
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            }
         } else {
             Swal.fire({ icon: "info", title: "Error", text: mensaje });
         }
+
     } catch (error) {
         console.error(error);
-        Swal.fire({ icon: "error", title: "Error de conexión", text: "No se pudieron cargar las aplicaciones" });
+        Swal.fire({
+            icon: "error",
+            title: "Error de conexión",
+            text: "No se pudieron cargar las aplicaciones"
+        });
     }
 };
+
 
 // DataTable Configuración
 const datatable = new DataTable('#TableAplicaciones', {

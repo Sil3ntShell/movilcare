@@ -41,7 +41,7 @@
       </div>
     </div>
 
-    <!-- CORREO Y ROL -->
+    <!-- CORREO -->
     <div class="row g-3 mb-3">
       <div class="col-md-8">
         <label for="usuario_correo" class="form-label">Correo Electrónico <span class="text-danger">*</span></label>
@@ -129,4 +129,5 @@
   </div>
 </div>
 
+<!-- Enlace a JS -->
 <script src="<?= asset('build/js/usuario/index.js') ?>"></script>
